@@ -22,7 +22,11 @@ DECIMALS = [1, 2, 3, 1, 1, 3]
 
 def fixed(x, d):
     """x with d decimals; an exact 0 is padded so that the decimal points stay aligned."""
-    return rf"0\phantom{{.{'0' * d}}}" if x == 0 else f"{x:.{d}f}"
+    if x == 0:
+        return rf"0\phantom{{.{'0' * d}}}"
+    if x < 10 ** -d:
+        return rf"{{<}}0.{'0' * (d - 1)}1"  # positive but below the last printed digit
+    return f"{x:.{d}f}"
 
 
 def load():
