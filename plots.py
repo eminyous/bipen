@@ -43,7 +43,7 @@ def paper_style():
 
 
 def polya_levels():
-    """zeta^(r) / (sqrt(g)/2) against r; levels where the programme is infeasible are not drawn."""
+    """zeta^(r) / (sqrt(g)/2) against r; levels where the program is infeasible are not drawn."""
     data = defaultdict(list)
     for r in csv.DictReader(open(os.path.join(ROOT, "data", "polya_levels.csv"))):
         data[r["graph"]].append((int(r["r"]), float(r["zeta"]) / float(r["half_sqrt_g"])))
