@@ -118,7 +118,7 @@ def thresholds():
         G = groups[(m, k)]
         a = [float(r["d_star"]) / ours(r) for r in G]
         b = [ours(r) / float(r["bound_gg"]) for r in G]
-        out.append(f"random ${m}+{k}$ & ${len(G)}$ & ${np.mean(a):.3f}$ & ${max(a):.3f}$ & ${np.mean(b):.3f}$ & ${min(b):.3f}$" + r"\\")
+        out.append(f"${m}+{k}$ & ${len(G)}$ & ${np.mean(a):.3f}$ & ${max(a):.3f}$ & ${np.mean(b):.3f}$ & ${min(b):.3f}$" + r"\\")
     out.append(r"\midrule")
     for r in sorted((r for r in rows if r["family"] == "near-biclique"), key=lambda r: int(r["k"])):
         a = float(r["d_star"]) / ours(r)
