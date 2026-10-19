@@ -109,7 +109,7 @@ def thresholds():
            r"\begin{tabular}{@{}lrrrrr@{}}", r"\toprule",
            r"& & \multicolumn{2}{c}{$\gamma^*/\gamma_1$} & \multicolumn{2}{c}{$\gamma_1/\gamma_2$}\\",
            r"\cmidrule(lr){3-4}\cmidrule(l){5-6}",
-           r"graphs & \# & mean & max & mean & min\\", r"\midrule"]
+           r"$G$ & \# & mean & max & mean & min\\", r"\midrule"]
     groups = defaultdict(list)
     for r in rows:
         if r["family"] == "random" and float(r["g"]) >= 1:
