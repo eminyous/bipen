@@ -1,4 +1,6 @@
-"""Table 1 of the note (booktabs), written to data/table1.tex from the random graphs in data/bounds.csv,
+"""Tables 1 to 3 of the note (booktabs), written to data/table1.tex, table2.tex and table3.tex.
+
+Table 1 is from the random graphs in data/bounds.csv,
 data/bounds_unbalanced.csv and data/random.csv.
 
 Run from code/:  python table.py
@@ -53,7 +55,7 @@ def main():
     sizes = defaultdict(list)
     for r in rows:
         sizes[(int(r["m"]), int(r["k"]))].append(r)
-    out = [r"\begin{table}[ht]", r"\centering\footnotesize\setlength{\tabcolsep}{4.5pt}",
+    out = [r"\begin{table}[p]", r"\centering\footnotesize\setlength{\tabcolsep}{4.5pt}",
            r"\caption{Random bipartite graphs with $|V_1|=m_1$ and $|V_2|=m_2$, for each size and edge probability $p$, "
            r"and for all three values of $p$ together; \# is the number of graphs. "
            r"Columns 4--6: number of graphs on which the bound is within $10^{-5}$ of $\frac12\sqrt g$. "
@@ -80,5 +82,53 @@ def main():
     open(os.path.join(ROOT, "data", "table1.tex"), "w").write("\n".join(out) + "\n")
 
 
+def matchings():
+    """Table 2: the bounds on the perfect matchings M_r."""
+    rows = [r for r in csv.DictReader(open(os.path.join(ROOT, "data", "bounds.csv"))) if r["family"] == "matching"]
+    out = [r"\begin{table}[ht]", r"\centering\small",
+           r"\caption{The bounds on the perfect matchings $M_r$. For odd $r$, $\frac12\sqrt g=\frac14\sqrt{r^2-1}$ "
+           r"while $h_1$ and $\eta_1(\cdot;\DNN)$ equal $r/4$; for even $r$ all bounds equal $r/4$.}\label{tbl-matchings}",
+           r"\begin{tabular}{@{}rrrrr@{}}", r"\toprule",
+           r"$r$ & $\frac12\sqrt g$ & $h_1$ & $\eta_1(\cdot;\DNN)$ & $\kappa^{(1)}$\\", r"\midrule"]
+    for r in sorted(rows, key=lambda r: int(r["m"])):
+        vals = [float(r[k]) for k in ("half_sqrt_g", "h1", "h1_dnn", "k1")]
+        out.append(" & ".join([f"${r['m']}$"] + [f"${v:.4f}$" for v in vals]) + r"\\")
+    out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    open(os.path.join(ROOT, "data", "table2.tex"), "w").write("\n".join(out) + "\n")
+
+
+def thresholds():
+    """Table 3: the smallest valid penalty gamma* against the threshold of Theorem 4.1 and that of Gillis and Glineur."""
+    rows = list(csv.DictReader(open(os.path.join(ROOT, "data", "partA_threshold.csv"))))
+    ours = lambda r: float(r["bound_sqrt_g"])
+    out = [r"\begin{table}[ht]", r"\centering\small",
+           r"\caption{The smallest valid penalty $\gamma^*$ against the threshold $\gamma_1=\left(1+\sqrt g\right)/2$ of "
+           r"Theorem~\ref{thm-penalty} and the threshold $\gamma_2=\left(1+\max\left(m_1,m_2\right)\right)/2$ of \cite{gillis2014continuous}, "
+           r"on random graphs (eight for each edge probability $p=0.2$, $0.4$, $0.6$ and $0.8$, without the empty and complete ones) and on the graphs $N_k$ "
+           r"of Proposition~\ref{prp-sharp}.}\label{tbl-threshold}",
+           r"\begin{tabular}{@{}lrrrrr@{}}", r"\toprule",
+           r"& & \multicolumn{2}{c}{$\gamma^*/\gamma_1$} & \multicolumn{2}{c}{$\gamma_1/\gamma_2$}\\",
+           r"\cmidrule(lr){3-4}\cmidrule(l){5-6}",
+           r"graphs & \# & mean & max & mean & min\\", r"\midrule"]
+    groups = defaultdict(list)
+    for r in rows:
+        if r["family"] == "random" and float(r["g"]) >= 1:
+            groups[(int(r["m"]), int(r["k"]))].append(r)
+    for m, k in sorted(groups):
+        G = groups[(m, k)]
+        a = [float(r["d_star"]) / ours(r) for r in G]
+        b = [ours(r) / float(r["bound_gg"]) for r in G]
+        out.append(f"random ${m}+{k}$ & ${len(G)}$ & ${np.mean(a):.3f}$ & ${max(a):.3f}$ & ${np.mean(b):.3f}$ & ${min(b):.3f}$" + r"\\")
+    out.append(r"\midrule")
+    for r in sorted((r for r in rows if r["family"] == "near-biclique"), key=lambda r: int(r["k"])):
+        a = float(r["d_star"]) / ours(r)
+        b = ours(r) / float(r["bound_gg"])
+        out.append(f"$N_{{{r['k']}}}$ & $1$ & ${a:.3f}$ & ${a:.3f}$ & ${b:.3f}$ & ${b:.3f}$" + r"\\")
+    out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    open(os.path.join(ROOT, "data", "table3.tex"), "w").write("\n".join(out) + "\n")
+
+
 if __name__ == "__main__":
     main()
+    matchings()
+    thresholds()
