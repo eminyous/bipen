@@ -104,7 +104,7 @@ def thresholds():
     out = [r"\begin{table}[ht]", r"\centering\small",
            r"\caption{The smallest valid penalty $\gamma^*$ against the threshold $\gamma_1=\left(1+\sqrt g\right)/2$ of "
            r"Theorem~\ref{thm-penalty} and the threshold $\gamma_2=\left(1+\max\left(m_1,m_2\right)\right)/2$ of \cite{gillis2014continuous}, "
-           r"on random graphs (eight for each edge probability $p=0.2$, $0.4$, $0.6$ and $0.8$, without the empty and complete ones) and on the graphs $N_k$ "
+           r"on random graphs ($100$ for each edge probability $p=0.2$, $0.4$, $0.6$ and $0.8$, without the empty and complete ones) and on the graphs $N_k$ "
            r"of Proposition~\ref{prp-sharp}.}\label{tbl-threshold}",
            r"\begin{tabular}{@{}lrrrrr@{}}", r"\toprule",
            r"& & \multicolumn{2}{c}{$\gamma^*/\gamma_1$} & \multicolumn{2}{c}{$\gamma_1/\gamma_2$}\\",

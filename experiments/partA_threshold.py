@@ -1,11 +1,13 @@
 """Smallest penalty d* with max{u^T (C - d A_G) u : u >= 0, |u| = 1} = sqrt(g)/2.
 
 Compares d* with the bound (1 + sqrt g)/2 and with (1 + max(|V1|,|V2|))/2, the
-Gillis-Glineur threshold after the change of parameter d_GG = 2d - 1.
+Gillis-Glineur threshold after the change of parameter d_GG = 2d - 1, on 100 random graphs for each size and each p
+(empty and complete graphs are skipped) and on the graphs N_k. Run with: python -m experiments.partA_threshold
 """
 
 import csv
 import sys
+from multiprocessing import Pool
 
 import numpy as np
 
@@ -37,37 +39,36 @@ def near_biclique(a):
     return B
 
 
-def main(out):
-    rng = np.random.default_rng(2026)
-    rows = []
-    for m, k in [(2, 3), (3, 3), (3, 4), (4, 4), (4, 5), (5, 5)]:
-        for p in [0.2, 0.4, 0.6, 0.8]:
-            for _ in range(8):
-                B = random_bipartite(m, k, p, rng)
-                if B.sum() == 0 or B.sum() == m * k:
-                    continue
-                d, g = threshold(B)
-                rows.append({"family": "random", "m": m, "k": k, "p": p, "edges": int(B.sum()), "g": g, "d_star": d,
-                             "bound_sqrt_g": (1 + np.sqrt(g)) / 2, "bound_gg": (1 + max(m, k)) / 2})
+SIZES = [(2, 3), (3, 3), (3, 4), (4, 4), (4, 5), (5, 5)]
+PS = [0.2, 0.4, 0.6, 0.8]
+SEEDS = 100
+
+
+def job(args):
+    m, k, p, s = args
+    B = random_bipartite(m, k, p, np.random.default_rng(100000 * k + 1000 * m + 100 * int(10 * p) + s))
+    if B.sum() == 0 or B.sum() == m * k:
+        return None
+    d, g = threshold(B)
+    return {"family": "random", "m": m, "k": k, "p": p, "seed": s, "edges": int(B.sum()), "g": g, "d_star": d,
+            "bound_sqrt_g": (1 + np.sqrt(g)) / 2, "bound_gg": (1 + max(m, k)) / 2}
+
+
+def main(out, workers):
+    todo = [(m, k, p, s) for m, k in SIZES for p in PS for s in range(SEEDS)]
+    with Pool(workers) as pool:
+        rows = [r for r in pool.map(job, todo, chunksize=8) if r is not None]
     for a in range(2, 6):
         B = near_biclique(a)
         d, g = threshold(B)
-        rows.append({"family": "near-biclique", "m": a + 1, "k": a, "p": "", "edges": 1, "g": g, "d_star": d,
+        rows.append({"family": "near-biclique", "m": a + 1, "k": a, "p": "", "seed": "", "edges": 1, "g": g, "d_star": d,
                      "bound_sqrt_g": (1 + np.sqrt(g)) / 2, "bound_gg": (1 + a + 1) / 2})
     with open(out, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=rows[0].keys())
         w.writeheader()
         w.writerows(rows)
-    ratio = max(r["d_star"] / r["bound_sqrt_g"] for r in rows)
-    viol = [r for r in rows if r["d_star"] > r["bound_sqrt_g"] + 1e-6]
-    print(f"{len(rows)} graphs; max d*/((1+sqrt g)/2) = {ratio:.4f}; violations: {len(viol)}")
-    for r in rows:
-        if r["family"] == "near-biclique":
-            print("near-biclique a =", r["k"], "d* =", round(r["d_star"], 5), "sqrt(g)/2 =", np.sqrt(r["g"]) / 2)
-    top = sorted(rows, key=lambda r: -r["d_star"] / r["bound_sqrt_g"])[:5]
-    for r in top:
-        print({k: (round(v, 4) if isinstance(v, float) else v) for k, v in r.items()})
+    print(len(rows), "rows written to", out)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "../data/partA_threshold.csv")
+    main(sys.argv[1] if len(sys.argv) > 1 else "../data/partA_threshold.csv", int(sys.argv[2]) if len(sys.argv) > 2 else 6)
