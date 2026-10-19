@@ -62,7 +62,7 @@ def main():
            r"\begin{tabular}{@{}rrrrrrrrrrr@{}}", r"\toprule",
            r"& & & \multicolumn{3}{c}{exact} & \multicolumn{2}{c}{mean gap (\%)} & \multicolumn{3}{c}{max gap (\%)}\\",
            r"\cmidrule(lr){4-6}\cmidrule(lr){7-8}\cmidrule(l){9-11}",
-           r"$m_1+m_2$ & $p$ & \# & $h_1$ & $h_1(G;\DNN)$ & $\kappa^{(1)}$ & $h_1$ & $h_1(G;\DNN)$ & $h_1$ & $h_1(G;\DNN)$ & $\kappa^{(1)}$\\"]
+           r"$m_1+m_2$ & $p$ & \# & $h_1$ & $\eta_1(G;\DNN)$ & $\kappa^{(1)}$ & $h_1$ & $\eta_1(G;\DNN)$ & $h_1$ & $\eta_1(G;\DNN)$ & $\kappa^{(1)}$\\"]
     for label, keep in (("balanced, $m_1=m_2$", lambda m, k: m == k), ("unbalanced, $m_1<m_2$", lambda m, k: m < k)):
         block = sorted((mk for mk in sizes if keep(*mk)), key=lambda mk: (mk[1] // mk[0], mk[0] + mk[1]))
         if not block:
