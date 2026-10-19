@@ -1,5 +1,5 @@
-"""Table 1 of the note (booktabs), written to data/table1.tex from the random graphs in data/bounds.csv and
-data/random.csv.
+"""Table 1 of the note (booktabs), written to data/table1.tex from the random graphs in data/bounds.csv,
+data/bounds_unbalanced.csv and data/random.csv.
 
 Run from code/:  python table.py
 """
@@ -26,7 +26,7 @@ def fixed(x, d):
 def load():
     """Random graphs from every results file, one row per (m, k, p, seed)."""
     rows = {}
-    for name in ("bounds.csv", "random.csv"):
+    for name in ("bounds.csv", "bounds_unbalanced.csv", "random.csv"):
         path = os.path.join(ROOT, "data", name)
         if os.path.exists(path):
             for r in csv.DictReader(open(path)):
