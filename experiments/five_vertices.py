@@ -14,7 +14,7 @@ import sympy as sp
 from bicop.brute import parameters
 
 HALF = sp.Rational(1, 2)
-# vertices 0, 1 = a, b (V_1) and 2, 3, 4 = 1, 2, 3 (V_2); y is the entry of Y on every edge
+# vertices 0, 1 = v11, v12 (V_1) and 2, 3, 4 = v21, v22, v23 (V_2); y is the entry of Y on every edge
 CERTIFICATES = {
     "G1": dict(edges=[(1, 4)], g=4, y=sp.Integer(1), N={}),
     "G2": dict(edges=[(1, 3), (1, 4)], g=3, y=sp.Rational(3, 4), N={}),
