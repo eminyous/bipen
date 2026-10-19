@@ -117,12 +117,14 @@ def matchings():
     """Table 2: the bounds on the perfect matchings M_r."""
     rows = [r for r in csv.DictReader(open(os.path.join(ROOT, "data", "bounds.csv"))) if r["family"] == "matching"]
     out = [r"\begin{table}[H]", r"\centering\small",
-           r"\caption{The bounds on the perfect matchings $M_r$. For odd $r$, $\frac12\sqrt g=\frac14\sqrt{r^2-1}$ "
-           r"while $h_1$ and $\eta_1(\cdot;\DNN)$ equal $r/4$; for even $r$ all bounds equal $r/4$.}\label{tbl-matchings}",
+           r"\caption{The bounds on the perfect matchings $M_r$, $2\le r\le12$, on which one of them is not exact, that is, for odd $r$; "
+           r"there $\frac12\sqrt g=\frac14\sqrt{r^2-1}$, while for even $r$ all bounds equal $r/4$.}\label{tbl-matchings}",
            r"\begin{tabular}{@{}rrrrr@{}}", r"\toprule",
            r"$r$ & $\frac12\sqrt g$ & $h_1$ & $\eta_1(\cdot;\DNN)$ & $\kappa^{(1)}$\\", r"\midrule"]
     for r in sorted(rows, key=lambda r: int(r["m"])):
         vals = [float(r[k]) for k in ("half_sqrt_g", "h1", "h1_dnn", "k1")]
+        if max(vals[1:]) - vals[0] < TOL:
+            continue  # every bound is exact
         out.append(" & ".join([f"${r['m']}$"] + [f"${v:.4f}$" for v in vals]) + r"\\")
     out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
     open(os.path.join(ROOT, "data", "table2.tex"), "w").write("\n".join(out) + "\n")
