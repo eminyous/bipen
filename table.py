@@ -123,7 +123,7 @@ def thresholds():
     for r in sorted((r for r in rows if r["family"] == "near-biclique"), key=lambda r: int(r["k"])):
         a = float(r["d_star"]) / ours(r)
         b = ours(r) / float(r["bound_gg"])
-        out.append(f"$N_{{{r['k']}}}$ & & ${a:.3f}$ & ${a:.3f}$ & ${b:.3f}$ & ${b:.3f}$" + r"\\")
+        out.append(f"$N_{{{r['k']}}}$ & & \\multicolumn{{2}}{{c}}{{${a:.3f}$}} & \\multicolumn{{2}}{{c}}{{${b:.3f}$}}" + r"\\")
     out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
     open(os.path.join(ROOT, "data", "table3.tex"), "w").write("\n".join(out) + "\n")
 
