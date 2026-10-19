@@ -93,7 +93,7 @@ def per_probability():
     sizes = by_size()
     out = [r"\begin{table}[p]", r"\centering\footnotesize\setlength{\tabcolsep}{3.2pt}",
            r"\caption{The random graphs of Table~\ref{tbl-random}, for each size and each edge probability $p$; "
-           r"the rows \emph{all} are those of Table~\ref{tbl-random}. "
+           r"the three probabilities together are in Table~\ref{tbl-random}. "
            r"Columns 4--6: number of graphs on which the bound is within $10^{-5}$ of $\frac12\sqrt g$. "
            r"Columns 7--12: " + GAPS + r".}\label{tbl-random-p}",
            r"\begin{tabular}{@{}rrrrrrrrrrrr@{}}", r"\toprule",
@@ -109,7 +109,6 @@ def per_probability():
             for j, p in enumerate(sorted({float(r["p"]) for r in G})):
                 first = f"${m}+{k}$" if j == 0 else ""
                 out.append(" & ".join([first, f"${p:g}$"] + cells([r for r in G if float(r["p"]) == p])) + r"\\")
-            out.append(" & ".join(["", r"\emph{all}"] + cells(G)) + r"\\")
     out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
     open(os.path.join(ROOT, "data", "tableB1.tex"), "w").write("\n".join(out) + "\n")
 
