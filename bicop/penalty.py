@@ -35,3 +35,24 @@ def max_on_nonneg_sphere(Q, tol=1e-9, return_support=False):
                     break
                 i = j - 1
     return (best, best_S) if return_support else best
+
+
+def ascent(M, x, y, iters=10000, tol=1e-12):
+    """Block-coordinate ascent for max x^T M y over nonnegative unit vectors: each step maximizes over one side,
+    x = (M y)_+ / |(M y)_+|, or the best vertex e_i when (M y)_+ = 0. Returns x, y, value, steps."""
+
+    def best(a):
+        if a.max() <= 0:
+            return np.eye(len(a))[np.argmax(a)]
+        a = np.maximum(a, 0)
+        return a / np.linalg.norm(a)
+
+    val = x @ M @ y
+    for t in range(iters):
+        x = best(M @ y)
+        y = best(M.T @ x)
+        new = x @ M @ y
+        if new - val < tol:
+            return x, y, new, t + 1
+        val = new
+    return x, y, val, iters
