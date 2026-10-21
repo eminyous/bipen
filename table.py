@@ -1,4 +1,4 @@
-"""Tables 1 to 4 and B.1 of the note (booktabs), written to data/table_*.tex: bounds_by_size (Table 1),
+"""Tables 1 to 4 and B.1 of the note (booktabs), written to tables/: bounds_by_size (Table 1),
 matchings (2), thresholds (3), local_ascent (4) and bounds_by_probability (B.1).
 
 Table 1 is from the random graphs in data/bounds.csv,
@@ -92,7 +92,7 @@ def main():
         out += [r"\midrule", rf"\multicolumn{{11}}{{@{{}}l}}{{\emph{{{label}}}}}\\"]
         out += [" & ".join([f"${m}+{k}$"] + cells(sizes[(m, k)])) + r"\\" for m, k in block]
     out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
-    open(os.path.join(ROOT, "data", "table_bounds_by_size.tex"), "w").write("\n".join(out) + "\n")
+    open(os.path.join(ROOT, "tables", "bounds_by_size.tex"), "w").write("\n".join(out) + "\n")
 
 
 def per_probability():
@@ -117,7 +117,7 @@ def per_probability():
                 first = f"${m}+{k}$" if j == 0 else ""
                 out.append(" & ".join([first, f"${p:g}$"] + cells([r for r in G if float(r["p"]) == p])) + r"\\")
     out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
-    open(os.path.join(ROOT, "data", "table_bounds_by_probability.tex"), "w").write("\n".join(out) + "\n")
+    open(os.path.join(ROOT, "tables", "bounds_by_probability.tex"), "w").write("\n".join(out) + "\n")
 
 
 def matchings():
@@ -134,7 +134,7 @@ def matchings():
             continue  # every bound is exact
         out.append(" & ".join([f"${r['m']}$"] + [f"${v:.4f}$" for v in vals]) + r"\\")
     out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
-    open(os.path.join(ROOT, "data", "table_matchings.tex"), "w").write("\n".join(out) + "\n")
+    open(os.path.join(ROOT, "tables", "matchings.tex"), "w").write("\n".join(out) + "\n")
 
 
 def biadjacency(r):
@@ -187,7 +187,7 @@ def thresholds():
         out.append(f"$N_{{{r['k']}}}$ & & \\multicolumn{{2}}{{c}}{{${a:.3f}$}} & \\multicolumn{{2}}{{c}}{{${b:.3f}$}}"
                    f" & \\multicolumn{{2}}{{c}}{{${c:.3f}$}} & \\multicolumn{{2}}{{c}}{{${d:.3f}$}}" + r"\\")
     out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
-    open(os.path.join(ROOT, "data", "table_thresholds.tex"), "w").write("\n".join(out) + "\n")
+    open(os.path.join(ROOT, "tables", "thresholds.tex"), "w").write("\n".join(out) + "\n")
 
 
 def ascent():
@@ -212,10 +212,11 @@ def ascent():
             cells = [f"${np.mean(groups[(m, p, t)]):.3f}$ & ${sum(x > 0 for x in groups[(m, p, t)])}$" for t in names]
             out.append(f"${m}+{m}$ & ${p}$ & " + " & ".join(cells) + r"\\")
     out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
-    open(os.path.join(ROOT, "data", "table_local_ascent.tex"), "w").write("\n".join(out) + "\n")
+    open(os.path.join(ROOT, "tables", "local_ascent.tex"), "w").write("\n".join(out) + "\n")
 
 
 if __name__ == "__main__":
+    os.makedirs(os.path.join(ROOT, "tables"), exist_ok=True)
     main()
     per_probability()
     matchings()
