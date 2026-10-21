@@ -1,7 +1,7 @@
 """The bounds of bounds_table on 100 random graphs for each size and each p in {0.3, 0.5, 0.7}.
 
 Balanced sizes use the seeds of bounds_table, 1000 m + 100 int(10 p) + s, so its 180 graphs are the seeds
-s < 10; they are copied from ../data/bounds.csv when it has their K^(1) bound. Unbalanced sizes use
+s < 10; they are copied from ../data/bounds.csv when it exists and has their K^(1) bound. Unbalanced sizes use
 100000 k + 1000 m + 100 int(10 p) + s. Results are appended to ../data/random.csv, largest graphs first,
 and a rerun skips the graphs already there. The 20+20 graphs need about 10 minutes and 5 GB each, and the
 whole run about 60 CPU hours.
@@ -50,8 +50,9 @@ def main(workers):
         w = csv.DictWriter(f, fieldnames=FIELDS)
         if new:
             w.writeheader()
+        if new and os.path.exists(OLD):
             w.writerows(r for r in csv.DictReader(open(OLD)) if r["family"] == "random" and r["k1"] not in ("", "nan"))
-            f.flush()
+        f.flush()
     done = {key(r) for r in csv.DictReader(open(OUT))}
     todo = [(m, k, p, s) for m, k in SIZES for p in PS for s in range(SEEDS) if (m, k, p, s) not in done]
     todo.sort(key=lambda t: -(t[0] + t[1]))
