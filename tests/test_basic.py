@@ -58,3 +58,20 @@ def test_dnn_and_k1_are_upper_bounds():
         B = random_bipartite(4, 5, 0.5, rng)
         t = 0.5 * np.sqrt(parameters(B)["g"])
         assert h1(B) >= h1(B, dnn=True) - 1e-6 >= cop_k1(B) - 2e-6 >= t - 3e-6
+
+
+def test_lasserre_bound_is_exact_at_order_alpha():
+    from bicop.sdp import g_las
+
+    B = np.eye(3)  # M_3: g = 2, alpha = 3
+    assert g_las(B, 2) >= 2 - 1e-6
+    assert abs(g_las(B, 3) - 2) < 1e-6
+
+
+def test_ascent_stays_at_an_optimal_pair():
+    from bicop.penalty import ascent
+
+    B = np.eye(3)  # optimal pair ({1}, {2, 3})
+    x, y = np.array([1.0, 0, 0]), np.array([0, 1.0, 1.0]) / np.sqrt(2)
+    *_, val, _ = ascent(1 - 2 * (1 + np.sqrt(2)) / 2 * B, x, y)
+    assert abs(val - np.sqrt(2)) < 1e-9
