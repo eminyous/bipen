@@ -9,6 +9,7 @@ pytest
 python -m experiments.bounds_table
 python -m experiments.random_graphs 12
 python -m experiments.k1_check 4
+python -m experiments.solver_bench 8
 python -m experiments.partA_threshold
 python -m experiments.smallest_dnn_gap
 python -m experiments.polya_finiteness
@@ -17,4 +18,4 @@ python table.py
 python plots.py
 ```
 
-`random_graphs` solves the 3000 random graphs, with as many workers as its argument: about 60 CPU hours, and 5 GB per 20+20 graph. `table.py` writes Tables 1 to 3 and `plots.py` Figure 1, without a solver.
+The programs are solved by MOSEK at tolerance 1e-10 (it needs a license); `BICOP_SOLVER=clarabel` switches to Clarabel. `random_graphs` solves the 3000 random graphs, with as many workers as its argument: about 60 CPU hours, and 4 GB per 20+20 graph. `solver_bench` compares MOSEK with Clarabel on a few graphs. `table.py` writes Tables 1 to 3 and `plots.py` Figure 1, without a solver.
