@@ -5,6 +5,7 @@ h1_dnn:  the same with X >= 0                                          (= T(G)/2
 cop_k1:  min lambda s.t. lambda I - C + sum_E y_ij (E_ij + E_ji) in K^(1)
          (Parrilo's cone, LMIs of Bomze-de Klerk 2002, Thm 2.3)
 cop_c1:  the same with the Polya LP cone C^(1) (Bomze-de Klerk Thm 2.4)
+g_las:   the Lasserre bound g_r(G) >= g(G) of LPV (29), in moment form
 """
 
 import itertools
@@ -12,8 +13,9 @@ import os
 
 import cvxpy as cp
 import numpy as np
+import scipy.sparse as sp
 
-from bicop.graphs import cost_matrix, edges
+from bicop.graphs import cost_matrix, edges, full_adjacency
 
 # MOSEK unless BICOP_SOLVER=clarabel. MOSEK's default tolerances can stop short of the optimum while reporting it
 # optimal, so they are tightened; TOL = None keeps Clarabel's defaults.
@@ -87,3 +89,23 @@ def cop_c1(B):
     cons += [M[j, j] + 2 * M[i, j] >= 0 for i in range(n) for j in range(n) if i != j]
     cons += [M[i, j] + M[i, l] + M[j, l] >= 0 for i, j, l in itertools.combinations(range(n), 3)]
     return _solve(cp.Problem(cp.Minimize(lam), cons))
+
+
+def g_las(B, r=2):
+    """g_r(G): max sum of y_ij over i in V1, j in V2, with y_0 = 1 and the moment matrix indexed by the stable
+    sets of size at most r PSD; y vanishes on the sets that contain an edge."""
+    m, k = B.shape
+    A = full_adjacency(B)
+    stable = lambda S: not any(A[i, j] for i, j in itertools.combinations(S, 2))
+    rows = [S for d in range(r + 1) for S in itertools.combinations(range(m + k), d) if stable(S)]
+    keys, P = {}, []
+    for a, S in enumerate(rows):
+        for b, T in enumerate(rows):
+            U = tuple(sorted(set(S) | set(T)))
+            if stable(U):
+                P.append((a * len(rows) + b, keys.setdefault(U, len(keys))))
+    y = cp.Variable(len(keys))
+    E = sp.coo_matrix((np.ones(len(P)), np.array(P).T), shape=(len(rows) ** 2, len(keys)))
+    M = cp.reshape(E @ y, (len(rows), len(rows)), order="C")
+    obj = sum(y[keys[(i, j)]] for i in range(m) for j in range(m, m + k) if (i, j) in keys)
+    return _solve(cp.Problem(cp.Maximize(obj), [M >> 0, y[keys[()]] == 1]))
