@@ -6,7 +6,7 @@ s < 10; they are copied from bounds.csv when it exists and has their K^(1) bound
 and a rerun skips the graphs already there. The 20+20 graphs need about 10 minutes and 5 GB each, and the
 whole run about 60 CPU hours.
 
-Run with: bicop run random-graphs --workers N
+Run with: bipen run random-graphs --workers N
 """
 
 import csv
@@ -16,7 +16,7 @@ from multiprocessing import Pool
 
 import numpy as np
 
-from bicop.graphs import random_bipartite
+from bipen.graphs import random_bipartite
 from experiments import bounds_table
 from experiments.bounds_table import FIELDS, row
 

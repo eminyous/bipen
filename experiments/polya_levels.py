@@ -6,8 +6,8 @@ import warnings
 
 import numpy as np
 
-from bicop.brute import parameters
-from bicop.polya import zeta
+from bipen.brute import parameters
+from bipen.polya import zeta
 from experiments.polya_finiteness import alpha_star
 
 warnings.filterwarnings("ignore")

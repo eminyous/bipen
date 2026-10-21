@@ -3,7 +3,7 @@
 Enumerates the bipartite graphs with sides 1+4 and 2+3 up to isomorphism, deletes full vertices, and checks
 that each graph either has at most four vertices left, has no edges, or is one of the four graphs of the
 appendix table. For those four, the certificate S = lambda I - C + Y - N is checked to be positive
-semidefinite in exact arithmetic (sympy). Run with: bicop run five-vertices
+semidefinite in exact arithmetic (sympy). Run with: bipen run five-vertices
 """
 
 import itertools
@@ -11,7 +11,7 @@ import itertools
 import numpy as np
 import sympy as sp
 
-from bicop.brute import parameters
+from bipen.brute import parameters
 
 HALF = sp.Rational(1, 2)
 # vertices 0, 1 = v11, v12 (V_1) and 2, 3, 4 = v21, v22, v23 (V_2); y is the entry of Y on every edge

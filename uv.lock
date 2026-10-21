@@ -7,7 +7,7 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "biclique-cop"
+name = "bipen"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

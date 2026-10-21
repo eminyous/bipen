@@ -1,8 +1,8 @@
 import numpy as np
 
-from bicop.brute import parameters
-from bicop.graphs import cost_matrix, full_adjacency, knn_minus_matching, random_bipartite
-from bicop.penalty import max_on_nonneg_sphere
+from bipen.brute import parameters
+from bipen.graphs import cost_matrix, full_adjacency, knn_minus_matching, random_bipartite
+from bipen.penalty import max_on_nonneg_sphere
 
 
 def brute_g(B):
@@ -39,7 +39,7 @@ def test_k1_matches_de_klerk_pasechnik_c5():
     # theta^(1)(C5) = 2 (de Klerk-Pasechnik 2002, Example 4.1)
     import cvxpy as cp
 
-    from bicop.sdp import _solve, k1_constraints
+    from bipen.sdp import _solve, k1_constraints
 
     n = 5
     A = np.zeros((n, n))
@@ -51,7 +51,7 @@ def test_k1_matches_de_klerk_pasechnik_c5():
 
 
 def test_dnn_and_k1_are_upper_bounds():
-    from bicop.sdp import cop_k1, h1
+    from bipen.sdp import cop_k1, h1
 
     rng = np.random.default_rng(3)
     for _ in range(5):
@@ -61,7 +61,7 @@ def test_dnn_and_k1_are_upper_bounds():
 
 
 def test_lasserre_bound_is_exact_at_order_alpha():
-    from bicop.sdp import g_las
+    from bipen.sdp import g_las
 
     B = np.eye(3)  # M_3: g = 2, alpha = 3
     assert g_las(B, 2) >= 2 - 1e-6
@@ -69,7 +69,7 @@ def test_lasserre_bound_is_exact_at_order_alpha():
 
 
 def test_ascent_stays_at_an_optimal_pair():
-    from bicop.penalty import ascent
+    from bipen.penalty import ascent
 
     B = np.eye(3)  # optimal pair ({1}, {2, 3})
     x, y = np.array([1.0, 0, 0]), np.array([0, 1.0, 1.0]) / np.sqrt(2)

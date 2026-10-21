@@ -6,8 +6,8 @@ import warnings
 
 import numpy as np
 
-from bicop.brute import parameters
-from bicop.sdp import h1
+from bipen.brute import parameters
+from bipen.sdp import h1
 
 warnings.filterwarnings("ignore")
 TOL = 1e-5

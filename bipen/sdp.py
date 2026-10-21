@@ -15,11 +15,11 @@ import cvxpy as cp
 import numpy as np
 import scipy.sparse as sp
 
-from bicop.graphs import cost_matrix, edges, full_adjacency
+from bipen.graphs import cost_matrix, edges, full_adjacency
 
-# MOSEK unless BICOP_SOLVER=clarabel. MOSEK's default tolerances can stop short of the optimum while reporting it
+# MOSEK unless BIPEN_SOLVER=clarabel. MOSEK's default tolerances can stop short of the optimum while reporting it
 # optimal, so they are tightened; TOL = None keeps Clarabel's defaults.
-SOLVER = cp.CLARABEL if os.environ.get("BICOP_SOLVER") == "clarabel" else cp.MOSEK
+SOLVER = cp.CLARABEL if os.environ.get("BIPEN_SOLVER") == "clarabel" else cp.MOSEK
 TOL = None
 
 

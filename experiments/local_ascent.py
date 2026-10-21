@@ -5,7 +5,7 @@ gamma_2 = (1 + max(m, k))/2, on the first 20 random graphs of the sizes 10+10, 1
 succeeds when it ends at value sqrt(g), that is, at a maximum biindependent pair; fallback is the fraction of runs
 whose first step finds (M y)_+ = 0 and moves to a vertex. Writes local_ascent.csv in the data folder.
 
-Run with: bicop run local-ascent --workers N
+Run with: bipen run local-ascent --workers N
 """
 
 import csv
@@ -14,9 +14,9 @@ from multiprocessing import Pool
 
 import numpy as np
 
-from bicop.brute import parameters
-from bicop.graphs import random_bipartite
-from bicop.penalty import ascent
+from bipen.brute import parameters
+from bipen.graphs import random_bipartite
+from bipen.penalty import ascent
 from experiments.random_graphs import seed
 
 SIZES = [10, 15, 20]

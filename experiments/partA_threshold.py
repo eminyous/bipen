@@ -2,7 +2,7 @@
 
 Compares d* with the bound (1 + sqrt g)/2 and with (1 + max(|V1|,|V2|))/2, the
 Gillis-Glineur threshold after the change of parameter d_GG = 2d - 1, on 100 random graphs for each size and each p
-(empty and complete graphs are skipped) and on the graphs N_k. Run with: bicop run partA-threshold
+(empty and complete graphs are skipped) and on the graphs N_k. Run with: bipen run partA-threshold
 """
 
 import csv
@@ -11,9 +11,9 @@ from multiprocessing import Pool
 
 import numpy as np
 
-from bicop.brute import parameters
-from bicop.graphs import cost_matrix, full_adjacency, random_bipartite
-from bicop.penalty import max_on_nonneg_sphere
+from bipen.brute import parameters
+from bipen.graphs import cost_matrix, full_adjacency, random_bipartite
+from bipen.penalty import max_on_nonneg_sphere
 
 
 def threshold(B, tol=1e-7):

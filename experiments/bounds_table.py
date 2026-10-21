@@ -10,9 +10,9 @@ import warnings
 
 import numpy as np
 
-from bicop.brute import parameters
-from bicop.graphs import knn_minus_matching, random_bipartite
-from bicop.sdp import cop_k1, h1
+from bipen.brute import parameters
+from bipen.graphs import knn_minus_matching, random_bipartite
+from bipen.sdp import cop_k1, h1
 
 warnings.filterwarnings("ignore")
 K1_MAX = 30

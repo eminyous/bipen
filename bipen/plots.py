@@ -1,4 +1,4 @@
-"""Figure 1 of the paper: the Pólya bounds zeta^(r) by level, from polya_levels.csv (no solver). Run with: bicop plots
+"""Figure 1 of the paper: the Pólya bounds zeta^(r) by level, from polya_levels.csv (no solver). Run with: bipen plots
 Drawn at printed size (text width about 4.6 in) with the paper's fonts; included without rescaling.
 """
 

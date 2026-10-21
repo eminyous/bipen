@@ -2,7 +2,7 @@
 each balanced size up to 15+15 and each p (the graphs of bounds_table). Writes lasserre.csv in the data folder; with
 a size and a number of seeds, it runs that size only and writes lasserre<size>.csv.
 
-Run with: bicop run lasserre-compare --workers N [--size 20 --seeds 3]
+Run with: bipen run lasserre-compare --workers N [--size 20 --seeds 3]
 """
 
 import csv
@@ -13,9 +13,9 @@ from multiprocessing import Pool
 
 import numpy as np
 
-from bicop.brute import parameters
-from bicop.graphs import random_bipartite
-from bicop.sdp import cop_k1, g_las
+from bipen.brute import parameters
+from bipen.graphs import random_bipartite
+from bipen.sdp import cop_k1, g_las
 from experiments.random_graphs import seed
 
 warnings.filterwarnings("ignore")

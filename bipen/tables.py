@@ -1,7 +1,7 @@
 """Tables 1 to 4 and B.1 of the note (booktabs), read from a data folder and written to a tables folder:
 bounds_by_size (Table 1), matchings (2), thresholds (3), local_ascent (4) and bounds_by_probability (B.1).
 
-Table 1 is from the random graphs in bounds.csv, bounds_unbalanced.csv and random.csv. Run with: bicop tables
+Table 1 is from the random graphs in bounds.csv, bounds_unbalanced.csv and random.csv. Run with: bipen tables
 """
 
 import csv
@@ -10,7 +10,7 @@ from collections import defaultdict
 
 import numpy as np
 
-from bicop.graphs import random_bipartite
+from bipen.graphs import random_bipartite
 
 TOL = 1e-5
 

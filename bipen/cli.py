@@ -1,4 +1,4 @@
-"""The bicop command: run the experiments of the paper and build its tables and figure.
+"""The bipen command: run the experiments of the paper and build its tables and figure.
 
 The folders default to data/, tables/ and figures/ of the paper folder that contains this code.
 """
@@ -37,7 +37,7 @@ def run(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(prog="bicop", description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(prog="bipen", description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("list", help="list the experiments")
     p = sub.add_parser("run", help="run one experiment")
@@ -60,10 +60,10 @@ def main():
     elif args.command == "run":
         run(args)
     elif args.command == "tables":
-        from bicop import tables
+        from bipen import tables
 
         tables.build(str(args.data), str(args.tables))
     else:
-        from bicop import plots
+        from bipen import plots
 
         plots.build(str(args.data), str(args.figures))

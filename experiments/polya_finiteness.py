@@ -9,7 +9,7 @@ import warnings
 
 import numpy as np
 
-from bicop.polya import zeta
+from bipen.polya import zeta
 
 warnings.filterwarnings("ignore")
 

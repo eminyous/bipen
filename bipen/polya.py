@@ -10,7 +10,7 @@ import itertools
 import cvxpy as cp
 import numpy as np
 
-from bicop.sdp import _dual_matrix, _solve
+from bipen.sdp import _dual_matrix, _solve
 
 
 def multi_indices(n, s):

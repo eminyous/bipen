@@ -2,7 +2,7 @@
 and record the primal and dual objectives and residuals, to check that the gaps are not numerical artefacts.
 The dual objective is a lower bound on kappa^(1) up to the dual residual.
 
-Writes k1_check.csv in the data folder. Run with: bicop run k1-check --workers N
+Writes k1_check.csv in the data folder. Run with: bipen run k1-check --workers N
 """
 
 import csv
@@ -15,10 +15,10 @@ import cvxpy as cp
 import mosek
 import numpy as np
 
-from bicop import sdp
-from bicop.brute import parameters
-from bicop.graphs import random_bipartite
-from bicop.sdp import _dual_matrix, k1_constraints
+from bipen import sdp
+from bipen.brute import parameters
+from bipen.graphs import random_bipartite
+from bipen.sdp import _dual_matrix, k1_constraints
 from experiments.random_graphs import seed
 
 warnings.filterwarnings("ignore")

@@ -2,7 +2,7 @@
 and kappa^(1), for one random graph per balanced size and the three largest kappa^(1) gaps of k1_check.csv.
 
 Each solve runs in its own process so that its peak memory can be read. Writes solver_bench.csv in the data folder.
-Run with: bicop run solver-bench --workers N
+Run with: bipen run solver-bench --workers N
 """
 
 import csv
@@ -15,9 +15,9 @@ from multiprocessing import Pool
 import cvxpy as cp
 import numpy as np
 
-from bicop import sdp
-from bicop.brute import parameters
-from bicop.graphs import random_bipartite
+from bipen import sdp
+from bipen.brute import parameters
+from bipen.graphs import random_bipartite
 from experiments.random_graphs import seed
 
 warnings.filterwarnings("ignore")
