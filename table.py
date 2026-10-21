@@ -195,14 +195,15 @@ def ascent():
     groups = defaultdict(list)
     for r in rows:
         groups[(int(r["m"]), float(r["p"]), r["threshold"])].append(float(r["success"]))
-    names = ["gamma1", "gamma4", "gamma3", "gamma2"]
+    names = ["gammak", "gamma4", "gamma3", "gamma2"]
+    labels = {"gammak": r"\gamma_\kappa", "gamma4": r"\gamma_4", "gamma3": r"\gamma_3", "gamma2": r"\gamma_2"}
     out = [r"\begin{table}[H]", r"\centering\small\setlength{\tabcolsep}{5pt}",
            r"\caption{Block-coordinate ascent on \eqref{eq-sigma} from $100$ random starts, on the first $20$ random graphs "
-           r"of each size and edge probability, with the penalties $\gamma_1$, $\gamma_4$, $\gamma_3$ and $\gamma_2$ of "
-           r"Table~\ref{tbl-threshold}: the fraction of starts that end at a maximum biindependent pair, and the number of "
-           r"graphs on which at least one start does.}\label{tbl-ascent}",
+           r"of each size and edge probability, with the penalty $\gamma_\kappa=\frac12+\kappa^{(1)}$ and the penalties "
+           r"$\gamma_4$, $\gamma_3$ and $\gamma_2$ of Table~\ref{tbl-threshold}: the fraction of starts that end at a maximum "
+           r"biindependent pair, and the number of graphs on which at least one start does.}\label{tbl-ascent}",
            r"\begin{tabular}{@{}lrrrrrrrrr@{}}", r"\toprule",
-           "& & " + " & ".join(rf"\multicolumn{{2}}{{c}}{{$\gamma_{t[-1]}$}}" for t in names) + r"\\",
+           "& & " + " & ".join(rf"\multicolumn{{2}}{{c}}{{${labels[t]}$}}" for t in names) + r"\\",
            r"\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(l){9-10}",
            r"$G$ & $p$" + r" & starts & graphs" * 4 + r"\\", r"\midrule"]
     for m in sorted({k[0] for k in groups}):
