@@ -1,7 +1,7 @@
-"""Polya LP bounds zeta^(r) on small structured graphs, for r up to R (data/polya_levels.csv)."""
+"""Polya LP bounds zeta^(r) on small structured graphs, for r up to R (polya_levels.csv in the data folder)."""
 
 import csv
-import sys
+import os
 import warnings
 
 import numpy as np
@@ -21,8 +21,8 @@ def graphs():
     yield "crown-4", np.ones((4, 4)) - np.eye(4)
 
 
-def main(out):
-    with open(out, "w", newline="") as f:
+def main(data):
+    with open(os.path.join(data, "polya_levels.csv"), "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["graph", "half_sqrt_g", "alpha_star", "r", "zeta"])
         for name, B in graphs():
@@ -33,6 +33,3 @@ def main(out):
                 w.writerow([name, t, a, r, z])
                 print(name, r, z, flush=True)
 
-
-if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "../data/polya_levels.csv")

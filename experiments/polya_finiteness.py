@@ -4,7 +4,7 @@ alpha*(G) = max |A| + |B| over biindependent pairs with A, B nonempty.
 """
 
 import itertools
-import sys
+import os
 import warnings
 
 import numpy as np
@@ -32,10 +32,10 @@ def first_finite(B, rmax):
     return None
 
 
-def main(out):
+def main(data):
     rng = np.random.default_rng(8)
     bad = 0
-    with open(out, "w") as f:
+    with open(os.path.join(data, "polya_finiteness.csv"), "w") as f:
         f.write("m,k,edges,alpha_star,first_finite_r\n")
         for m, k in [(2, 2), (2, 3), (3, 3), (3, 4)]:
             for _ in range(15):
@@ -48,6 +48,3 @@ def main(out):
                 bad += r != a - 1
     print("graphs where first finite level != alpha* - 1:", bad)
 
-
-if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "../data/polya_finiteness.csv")

@@ -2,11 +2,11 @@
 
 Compares d* with the bound (1 + sqrt g)/2 and with (1 + max(|V1|,|V2|))/2, the
 Gillis-Glineur threshold after the change of parameter d_GG = 2d - 1, on 100 random graphs for each size and each p
-(empty and complete graphs are skipped) and on the graphs N_k. Run with: python -m experiments.partA_threshold
+(empty and complete graphs are skipped) and on the graphs N_k. Run with: bicop run partA-threshold
 """
 
 import csv
-import sys
+import os
 from multiprocessing import Pool
 
 import numpy as np
@@ -54,7 +54,7 @@ def job(args):
             "bound_sqrt_g": (1 + np.sqrt(g)) / 2, "bound_gg": (1 + max(m, k)) / 2}
 
 
-def main(out, workers):
+def main(data, workers=6):
     todo = [(m, k, p, s) for m, k in SIZES for p in PS for s in range(SEEDS)]
     with Pool(workers) as pool:
         rows = [r for r in pool.map(job, todo, chunksize=8) if r is not None]
@@ -63,12 +63,10 @@ def main(out, workers):
         d, g = threshold(B)
         rows.append({"family": "near-biclique", "m": a + 1, "k": a, "p": "", "seed": "", "edges": 1, "g": g, "d_star": d,
                      "bound_sqrt_g": (1 + np.sqrt(g)) / 2, "bound_gg": (1 + a + 1) / 2})
+    out = os.path.join(data, "partA_threshold.csv")
     with open(out, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=rows[0].keys())
         w.writeheader()
         w.writerows(rows)
     print(len(rows), "rows written to", out)
 
-
-if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "../data/partA_threshold.csv", int(sys.argv[2]) if len(sys.argv) > 2 else 6)

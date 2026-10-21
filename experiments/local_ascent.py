@@ -1,15 +1,15 @@
 """Block-coordinate ascent on max x^T (J - 2 gamma W) y over nonnegative unit vectors, from 100 random starts
 (numpy.random.default_rng(s) for the graph with seed index s), for the thresholds gamma_1 = (1 + sqrt g)/2,
-gamma_k = 1/2 + kappa^(1) (from ../data/random.csv), gamma_4 = (1 + |J - W|_2)/2, gamma_3 = (1 + sqrt|E(G^)|)/2 and
+gamma_k = 1/2 + kappa^(1) (from random.csv), gamma_4 = (1 + |J - W|_2)/2, gamma_3 = (1 + sqrt|E(G^)|)/2 and
 gamma_2 = (1 + max(m, k))/2, on the first 20 random graphs of the sizes 10+10, 15+15 and 20+20 and each p. A run
 succeeds when it ends at value sqrt(g), that is, at a maximum biindependent pair; fallback is the fraction of runs
-whose first step finds (M y)_+ = 0 and moves to a vertex. Writes ../data/local_ascent.csv.
+whose first step finds (M y)_+ = 0 and moves to a vertex. Writes local_ascent.csv in the data folder.
 
-Run with: python -m experiments.local_ascent <workers>
+Run with: bicop run local-ascent --workers N
 """
 
 import csv
-import sys
+import os
 from multiprocessing import Pool
 
 import numpy as np
@@ -19,12 +19,10 @@ from bicop.graphs import random_bipartite
 from bicop.penalty import ascent
 from experiments.random_graphs import seed
 
-OUT = "../data/local_ascent.csv"
 SIZES = [10, 15, 20]
 PS = [0.3, 0.5, 0.7]
 STARTS = 100
-KAPPA = {(int(r["m"]), int(r["k"]), float(r["p"]), int(r["seed"])): float(r["k1"])
-         for r in csv.DictReader(open("../data/random.csv"))}
+KAPPA = {}  # kappa^(1) by graph, read from random.csv by main before the workers start
 
 
 def job(args):
@@ -47,9 +45,11 @@ def job(args):
     return rows
 
 
-def main(workers):
+def main(data, workers=2):
+    KAPPA.update({(int(r["m"]), int(r["k"]), float(r["p"]), int(r["seed"])): float(r["k1"])
+                  for r in csv.DictReader(open(os.path.join(data, "random.csv")))})
     todo = [(m, p, s) for m in SIZES for p in PS for s in range(20)]
-    with open(OUT, "w", newline="") as f, Pool(workers) as pool:
+    with open(os.path.join(data, "local_ascent.csv"), "w", newline="") as f, Pool(workers) as pool:
         w = None
         for rows in pool.imap_unordered(job, todo):
             if w is None:
@@ -59,6 +59,3 @@ def main(workers):
             f.flush()
     print("finished", flush=True)
 
-
-if __name__ == "__main__":
-    main(int(sys.argv[1]) if len(sys.argv) > 1 else 2)

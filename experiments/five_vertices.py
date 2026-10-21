@@ -3,7 +3,7 @@
 Enumerates the bipartite graphs with sides 1+4 and 2+3 up to isomorphism, deletes full vertices, and checks
 that each graph either has at most four vertices left, has no edges, or is one of the four graphs of the
 appendix table. For those four, the certificate S = lambda I - C + Y - N is checked to be positive
-semidefinite in exact arithmetic (sympy). Run with: python -m experiments.five_vertices
+semidefinite in exact arithmetic (sympy). Run with: bicop run five-vertices
 """
 
 import itertools
@@ -89,6 +89,3 @@ def main():
         assert parameters(biadjacency(c["edges"]).astype(float))["g"] == c["g"]
         print(name, "g =", c["g"], "eigenvalues of S:", check_certificate(c))
 
-
-if __name__ == "__main__":
-    main()

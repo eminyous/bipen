@@ -1,12 +1,12 @@
 """kappa^(1) against the Lasserre bound sqrt(g_2)/2 of LPV, values and times, on the first ten random graphs of
-each balanced size up to 15+15 and each p (the graphs of bounds_table). Writes ../data/lasserre.csv; with a size,
-a number of seeds and a file name, it runs that size only (python -m experiments.lasserre_compare 5 20 3 lasserre20.csv).
+each balanced size up to 15+15 and each p (the graphs of bounds_table). Writes lasserre.csv in the data folder; with
+a size and a number of seeds, it runs that size only and writes lasserre<size>.csv.
 
-Run with: python -m experiments.lasserre_compare <workers> [size seeds file]
+Run with: bicop run lasserre-compare --workers N [--size 20 --seeds 3]
 """
 
 import csv
-import sys
+import os
 import time
 import warnings
 from multiprocessing import Pool
@@ -19,7 +19,6 @@ from bicop.sdp import cop_k1, g_las
 from experiments.random_graphs import seed
 
 warnings.filterwarnings("ignore")
-OUT = "../data/lasserre.csv"
 SIZES = [6, 8, 10, 12, 15]
 PS = [0.3, 0.5, 0.7]
 
@@ -37,9 +36,10 @@ def job(args):
             "las2": las, "seconds_k1": round(t_k1, 2), "seconds_las2": round(t_las, 2)}
 
 
-def main(workers, sizes=SIZES, seeds=10, out=OUT):
+def main(data, workers=2, size=None, seeds=10):
+    sizes, name = (SIZES, "lasserre.csv") if size is None else ([size], f"lasserre{size}.csv")
     todo = sorted([(m, p, s) for m in sizes for p in PS for s in range(seeds)], key=lambda t: -t[0])
-    with open(out, "w", newline="") as f, Pool(workers) as pool:
+    with open(os.path.join(data, name), "w", newline="") as f, Pool(workers) as pool:
         w = None
         for r in pool.imap_unordered(job, todo):
             if w is None:
@@ -50,9 +50,3 @@ def main(workers, sizes=SIZES, seeds=10, out=OUT):
             print(*r.values(), flush=True)
     print("finished", flush=True)
 
-
-if __name__ == "__main__":
-    if len(sys.argv) > 2:
-        main(int(sys.argv[1]), [int(sys.argv[2])], int(sys.argv[3]), "../data/" + sys.argv[4])
-    else:
-        main(int(sys.argv[1]) if len(sys.argv) > 1 else 2)

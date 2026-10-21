@@ -1,7 +1,7 @@
 """Search small bipartite graphs for h1_dnn > sqrt(g)/2 (exhaustive for small sides, then sampled)."""
 
 import itertools
-import sys
+import os
 import warnings
 
 import numpy as np
@@ -19,9 +19,9 @@ def check(B):
     return d - t, t, d
 
 
-def main(out):
+def main(data):
     found = []
-    with open(out, "w") as f:
+    with open(os.path.join(data, "smallest_dnn_gap.txt"), "w") as f:
         for m, k in [(2, 3), (3, 3), (2, 4), (3, 4), (2, 5)]:
             worst = 0.0
             for bits in itertools.product([0, 1], repeat=m * k):
@@ -45,6 +45,3 @@ def main(out):
                 f.write(f"{m}x{k} gap={worst:.6f} B={hit.astype(int).tolist()}\n")
                 f.flush()
 
-
-if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "../data/smallest_dnn_gap.txt")

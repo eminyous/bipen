@@ -1,10 +1,10 @@
 """h, sqrt(g)/2, h1, h1_dnn and the K^(1) copositive bound on graph families.
 
-Writes data/bounds.csv. K^(1) is computed for n <= K1_MAX only (cost grows like n^3).
+Writes bounds.csv in the data folder. K^(1) is computed for n <= K1_MAX only (cost grows like n^3).
 """
 
 import csv
-import sys
+import os
 import time
 import warnings
 
@@ -42,8 +42,8 @@ def graphs():
                 yield "random", random_bipartite(m, m, p, np.random.default_rng(1000 * m + 100 * int(10 * p) + s)), p, s
 
 
-def main(out):
-    with open(out, "w", newline="") as f:
+def main(data):
+    with open(os.path.join(data, "bounds.csv"), "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=FIELDS)
         w.writeheader()
         for fam, B, p, s in graphs():
@@ -52,6 +52,3 @@ def main(out):
             f.flush()
             print(fam, B.shape, p, s, r["seconds"], flush=True)
 
-
-if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "../data/bounds.csv")

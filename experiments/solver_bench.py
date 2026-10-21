@@ -1,13 +1,13 @@
 """Time, peak memory and accuracy of MOSEK (tolerance 1e-10) against Clarabel (default and 1e-10) on h1, h1_dnn
 and kappa^(1), for one random graph per balanced size and the three largest kappa^(1) gaps of k1_check.csv.
 
-Each solve runs in its own process so that its peak memory can be read. Writes ../data/solver_bench.csv.
-Run with: python -m experiments.solver_bench <workers>
+Each solve runs in its own process so that its peak memory can be read. Writes solver_bench.csv in the data folder.
+Run with: bicop run solver-bench --workers N
 """
 
 import csv
+import os
 import resource
-import sys
 import time
 import warnings
 from multiprocessing import Pool
@@ -21,14 +21,13 @@ from bicop.graphs import random_bipartite
 from experiments.random_graphs import seed
 
 warnings.filterwarnings("ignore")
-OUT = "../data/solver_bench.csv"
 SETTINGS = [(cp.MOSEK, 1e-10), (cp.CLARABEL, None), (cp.CLARABEL, 1e-10)]
 BOUNDS = ["h1", "h1_dnn", "k1"]
 
 
-def graphs():
+def graphs(data):
     out = [(m, m, 0.5, 0) for m in (6, 8, 10, 12, 15, 20)]
-    rows = sorted(csv.DictReader(open("../data/k1_check.csv")),
+    rows = sorted(csv.DictReader(open(os.path.join(data, "k1_check.csv"))),
                   key=lambda r: -(float(r["primal"]) - float(r["half_sqrt_g"])) / float(r["half_sqrt_g"]))
     out += [(int(r["m"]), int(r["k"]), float(r["p"]), int(r["seed"])) for r in rows[:3]]
     return out
@@ -47,10 +46,10 @@ def job(args):
             "peak_gb": round(rss, 2)}
 
 
-def main(workers):
-    todo = [(g, st, b) for g in graphs() for st in SETTINGS for b in BOUNDS]
+def main(data, workers=2):
+    todo = [(g, st, b) for g in graphs(data) for st in SETTINGS for b in BOUNDS]
     todo.sort(key=lambda t: t[0][0] + t[0][1])
-    with open(OUT, "w", newline="") as f, Pool(workers, maxtasksperchild=1) as pool:
+    with open(os.path.join(data, "solver_bench.csv"), "w", newline="") as f, Pool(workers, maxtasksperchild=1) as pool:
         w = None
         for r in pool.imap_unordered(job, todo):
             if w is None:
@@ -61,6 +60,3 @@ def main(workers):
             print(*r.values(), flush=True)
     print("finished", flush=True)
 
-
-if __name__ == "__main__":
-    main(int(sys.argv[1]) if len(sys.argv) > 1 else 2)
