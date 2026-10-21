@@ -1,6 +1,6 @@
 # bipen
 
-Code of the paper "Penalty thresholds for the maximum-edge biclique problem" (Y. Emine, B. Ghaddar).
+Code of the paper "Exact penalties for maximum-edge bicliques in bipartite graphs" (Y. Emine, B. Ghaddar).
 
 ```bash
 uv sync
