@@ -12,6 +12,8 @@ from collections import defaultdict
 
 import numpy as np
 
+from bicop.graphs import random_bipartite
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOL = 1e-5
 
@@ -134,22 +136,35 @@ def matchings():
     open(os.path.join(ROOT, "data", "table2.tex"), "w").write("\n".join(out) + "\n")
 
 
+def biadjacency(r):
+    """The graph of a row of partA_threshold.csv: a random graph from its seed, or N_k with its single edge."""
+    m, k = int(r["m"]), int(r["k"])
+    if r["family"] == "random":
+        p, s = float(r["p"]), int(r["seed"])
+        return random_bipartite(m, k, p, np.random.default_rng(100000 * k + 1000 * m + 100 * int(10 * p) + s))
+    B = np.zeros((m, k))
+    B[0, 0] = 1
+    return B
+
+
 def thresholds():
     """Table 3: the smallest valid penalty gamma* against the thresholds of Theorem 4.3 and of Gillis and Glineur."""
     rows = list(csv.DictReader(open(os.path.join(ROOT, "data", "partA_threshold.csv"))))
     ours = lambda r: float(r["bound_sqrt_g"])
     # Gillis-Glineur, Lemma 3: 2*gamma - 1 >= sqrt of the number of edges of the bipartite complement
     lemma3 = lambda r: (1 + np.sqrt(int(r["m"]) * int(r["k"]) - int(r["edges"]))) / 2
+    spectral = lambda r: (1 + np.linalg.norm(1 - biadjacency(r), 2)) / 2
     out = [r"\begin{table}[H]", r"\centering\small",
            r"\caption{The smallest valid penalty $\gamma^*$ against the threshold $\gamma_1=\left(1+\sqrt g\right)/2$ of "
-           r"Theorem~\ref{thm-penalty} and the thresholds $\gamma_2=\left(1+\max\left(m_1,m_2\right)\right)/2$ and $\gamma_3=\bigl(1+\sqrt{|E(\widehat G)|}\bigr)/2$ "
-           r"of \cite[Theorem 2 and Lemma 3]{gillis2014continuous}, "
+           r"Theorem~\ref{thm-penalty}, the thresholds $\gamma_2=\left(1+\max\left(m_1,m_2\right)\right)/2$ and $\gamma_3=\bigl(1+\sqrt{|E(\widehat G)|}\bigr)/2$ "
+           r"of \cite[Theorem 2 and Lemma 3]{gillis2014continuous}, and $\gamma_4=\left(1+\|J-W\|_2\right)/2$, "
            r"on random graphs ($100$ for each edge probability $p=0.2$, $0.4$, $0.6$ and $0.8$, without the empty and complete ones) and on the graphs $N_k$ "
            r"of Proposition~\ref{prp-sharp}.}\label{tbl-threshold}",
-           r"\begin{tabular}{@{}lrrrrrrr@{}}", r"\toprule",
-           r"& & \multicolumn{2}{c}{$\gamma^*/\gamma_1$} & \multicolumn{2}{c}{$\gamma_1/\gamma_2$} & \multicolumn{2}{c}{$\gamma_1/\gamma_3$}\\",
-           r"\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(l){7-8}",
-           r"$G$ & \# & mean & max & mean & min & mean & min\\", r"\midrule"]
+           r"\begin{tabular}{@{}lrrrrrrrrr@{}}", r"\toprule",
+           r"& & \multicolumn{2}{c}{$\gamma^*/\gamma_1$} & \multicolumn{2}{c}{$\gamma_1/\gamma_2$} & \multicolumn{2}{c}{$\gamma_1/\gamma_3$}"
+           r" & \multicolumn{2}{c}{$\gamma_1/\gamma_4$}\\",
+           r"\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(l){9-10}",
+           r"$G$ & \# & mean & max & mean & min & mean & min & mean & min\\", r"\midrule"]
     groups = defaultdict(list)
     for r in rows:
         if r["family"] == "random" and float(r["g"]) >= 1:
@@ -159,15 +174,17 @@ def thresholds():
         a = [float(r["d_star"]) / ours(r) for r in G]
         b = [ours(r) / float(r["bound_gg"]) for r in G]
         c = [ours(r) / lemma3(r) for r in G]
+        d = [ours(r) / spectral(r) for r in G]
         out.append(f"${m}+{k}$ & ${len(G)}$ & ${np.mean(a):.3f}$ & ${max(a):.3f}$ & ${np.mean(b):.3f}$ & ${min(b):.3f}$"
-                   f" & ${np.mean(c):.3f}$ & ${min(c):.3f}$" + r"\\")
+                   f" & ${np.mean(c):.3f}$ & ${min(c):.3f}$ & ${np.mean(d):.3f}$ & ${min(d):.3f}$" + r"\\")
     out.append(r"\midrule")
     for r in sorted((r for r in rows if r["family"] == "near-biclique"), key=lambda r: int(r["k"])):
         a = float(r["d_star"]) / ours(r)
         b = ours(r) / float(r["bound_gg"])
         c = ours(r) / lemma3(r)
+        d = ours(r) / spectral(r)
         out.append(f"$N_{{{r['k']}}}$ & & \\multicolumn{{2}}{{c}}{{${a:.3f}$}} & \\multicolumn{{2}}{{c}}{{${b:.3f}$}}"
-                   f" & \\multicolumn{{2}}{{c}}{{${c:.3f}$}}" + r"\\")
+                   f" & \\multicolumn{{2}}{{c}}{{${c:.3f}$}} & \\multicolumn{{2}}{{c}}{{${d:.3f}$}}" + r"\\")
     out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
     open(os.path.join(ROOT, "data", "table3.tex"), "w").write("\n".join(out) + "\n")
 
