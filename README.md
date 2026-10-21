@@ -1,6 +1,6 @@
-# Completely positive and copositive formulations for biindependent pairs in bipartite graphs
+# bicop
 
-Code (`bicop`) for the paper by Y. Emine and B. Ghaddar. Run it from this folder inside the paper repository; the results go to `../data/`.
+Code of the paper "Completely positive and copositive formulations for biindependent pairs in bipartite graphs" (Y. Emine, B. Ghaddar). Run from this folder; outputs go to `../data/`.
 
 ```bash
 uv sync
@@ -18,4 +18,13 @@ python table.py
 python plots.py
 ```
 
-The programs are solved by MOSEK at tolerance 1e-10 (it needs a license); `BICOP_SOLVER=clarabel` switches to Clarabel. `random_graphs` solves the 3000 random graphs, with as many workers as its argument: about 60 CPU hours, and 4 GB per 20+20 graph. `solver_bench` compares MOSEK with Clarabel on a few graphs. `table.py` writes Tables 1 to 3 and `plots.py` Figure 1, without a solver.
+- `bounds_table`: bounds on the structured graphs and the first random ones
+- `random_graphs`: the 3000 random graphs (about 60 CPU hours)
+- `k1_check`: the graphs where κ⁽¹⁾ is not exact, at tolerance 1e-10
+- `solver_bench`: MOSEK against Clarabel
+- `partA_threshold`: the smallest valid penalty γ*
+- `smallest_dnn_gap`: small graphs where the DNN bound is not exact
+- `polya_finiteness`, `polya_levels`: the Pólya bounds
+- `table.py`, `plots.py`: the tables and Figure 1, without a solver
+
+MOSEK needs a license; `BICOP_SOLVER=clarabel` uses Clarabel instead.
