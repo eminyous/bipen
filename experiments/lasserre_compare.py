@@ -1,7 +1,8 @@
 """kappa^(1) against the Lasserre bound sqrt(g_2)/2 of LPV, values and times, on the first ten random graphs of
-each balanced size up to 15+15 and each p (the graphs of bounds_table). Writes ../data/lasserre.csv.
+each balanced size up to 15+15 and each p (the graphs of bounds_table). Writes ../data/lasserre.csv; with a size,
+a number of seeds and a file name, it runs that size only (python -m experiments.lasserre_compare 5 20 3 lasserre20.csv).
 
-Run with: python -m experiments.lasserre_compare <workers>
+Run with: python -m experiments.lasserre_compare <workers> [size seeds file]
 """
 
 import csv
@@ -36,9 +37,9 @@ def job(args):
             "las2": las, "seconds_k1": round(t_k1, 2), "seconds_las2": round(t_las, 2)}
 
 
-def main(workers):
-    todo = sorted([(m, p, s) for m in SIZES for p in PS for s in range(10)], key=lambda t: -t[0])
-    with open(OUT, "w", newline="") as f, Pool(workers) as pool:
+def main(workers, sizes=SIZES, seeds=10, out=OUT):
+    todo = sorted([(m, p, s) for m in sizes for p in PS for s in range(seeds)], key=lambda t: -t[0])
+    with open(out, "w", newline="") as f, Pool(workers) as pool:
         w = None
         for r in pool.imap_unordered(job, todo):
             if w is None:
@@ -51,4 +52,7 @@ def main(workers):
 
 
 if __name__ == "__main__":
-    main(int(sys.argv[1]) if len(sys.argv) > 1 else 2)
+    if len(sys.argv) > 2:
+        main(int(sys.argv[1]), [int(sys.argv[2])], int(sys.argv[3]), "../data/" + sys.argv[4])
+    else:
+        main(int(sys.argv[1]) if len(sys.argv) > 1 else 2)
