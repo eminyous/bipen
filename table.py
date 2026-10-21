@@ -1,4 +1,4 @@
-"""Tables 1 to 3 and B.1 of the note (booktabs), written to data/table1.tex, table2.tex, table3.tex and tableB1.tex.
+"""Tables 1 to 4 and B.1 of the note (booktabs), written to data/table1.tex to table4.tex and tableB1.tex.
 
 Table 1 is from the random graphs in data/bounds.csv,
 data/bounds_unbalanced.csv and data/random.csv.
@@ -189,8 +189,33 @@ def thresholds():
     open(os.path.join(ROOT, "data", "table3.tex"), "w").write("\n".join(out) + "\n")
 
 
+def ascent():
+    """Table 4: block-coordinate ascent on (7) from 100 random starts, for the four penalties."""
+    rows = list(csv.DictReader(open(os.path.join(ROOT, "data", "local_ascent.csv"))))
+    groups = defaultdict(list)
+    for r in rows:
+        groups[(int(r["m"]), float(r["p"]), r["threshold"])].append(float(r["success"]))
+    names = ["gamma1", "gamma4", "gamma3", "gamma2"]
+    out = [r"\begin{table}[H]", r"\centering\small\setlength{\tabcolsep}{5pt}",
+           r"\caption{Block-coordinate ascent on \eqref{eq-sigma} from $100$ random starts, on the first $20$ random graphs "
+           r"of each size and edge probability, with the penalties $\gamma_1$, $\gamma_4$, $\gamma_3$ and $\gamma_2$ of "
+           r"Table~\ref{tbl-threshold}: the fraction of starts that end at a maximum biindependent pair, and the number of "
+           r"graphs on which at least one start does.}\label{tbl-ascent}",
+           r"\begin{tabular}{@{}lrrrrrrrrr@{}}", r"\toprule",
+           "& & " + " & ".join(rf"\multicolumn{{2}}{{c}}{{$\gamma_{t[-1]}$}}" for t in names) + r"\\",
+           r"\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(l){9-10}",
+           r"$G$ & $p$" + r" & starts & graphs" * 4 + r"\\", r"\midrule"]
+    for m in sorted({k[0] for k in groups}):
+        for p in sorted({k[1] for k in groups}):
+            cells = [f"${np.mean(groups[(m, p, t)]):.3f}$ & ${sum(x > 0 for x in groups[(m, p, t)])}$" for t in names]
+            out.append(f"${m}+{m}$ & ${p}$ & " + " & ".join(cells) + r"\\")
+    out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    open(os.path.join(ROOT, "data", "table4.tex"), "w").write("\n".join(out) + "\n")
+
+
 if __name__ == "__main__":
     main()
     per_probability()
     matchings()
     thresholds()
+    ascent()
