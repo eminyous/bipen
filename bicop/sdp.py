@@ -8,15 +8,31 @@ cop_c1:  the same with the Polya LP cone C^(1) (Bomze-de Klerk Thm 2.4)
 """
 
 import itertools
+import os
 
 import cvxpy as cp
 import numpy as np
 
 from bicop.graphs import cost_matrix, edges
 
+# MOSEK unless BICOP_SOLVER=clarabel. MOSEK's default tolerances can stop short of the optimum while reporting it
+# optimal, so they are tightened; TOL = None keeps Clarabel's defaults.
+SOLVER = cp.CLARABEL if os.environ.get("BICOP_SOLVER") == "clarabel" else cp.MOSEK
+TOL = None
+
+
+def solver_opts(tol):
+    if SOLVER == cp.CLARABEL:
+        return {} if tol is None else {"tol_gap_abs": tol, "tol_gap_rel": tol, "tol_feas": tol}
+    tol = tol or 1e-10
+    params = {"MSK_DPAR_INTPNT_CO_TOL_REL_GAP": tol, "MSK_DPAR_INTPNT_CO_TOL_PFEAS": tol,
+              "MSK_DPAR_INTPNT_CO_TOL_DFEAS": tol, "MSK_DPAR_INTPNT_TOL_REL_GAP": tol,
+              "MSK_DPAR_INTPNT_TOL_PFEAS": tol, "MSK_DPAR_INTPNT_TOL_DFEAS": tol, "MSK_IPAR_NUM_THREADS": 2}
+    return {"mosek_params": params, "accept_unknown": True}
+
 
 def _solve(prob):
-    prob.solve(solver=cp.CLARABEL)
+    prob.solve(solver=SOLVER, **solver_opts(TOL))
     if prob.status not in ("optimal", "optimal_inaccurate"):
         return np.inf if prob.status == "infeasible" else np.nan
     return prob.value
