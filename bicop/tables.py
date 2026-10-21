@@ -1,10 +1,7 @@
-"""Tables 1 to 4 and B.1 of the note (booktabs), written to tables/: bounds_by_size (Table 1),
-matchings (2), thresholds (3), local_ascent (4) and bounds_by_probability (B.1).
+"""Tables 1 to 4 and B.1 of the note (booktabs), read from a data folder and written to a tables folder:
+bounds_by_size (Table 1), matchings (2), thresholds (3), local_ascent (4) and bounds_by_probability (B.1).
 
-Table 1 is from the random graphs in data/bounds.csv,
-data/bounds_unbalanced.csv and data/random.csv.
-
-Run from code/:  python table.py
+Table 1 is from the random graphs in bounds.csv, bounds_unbalanced.csv and random.csv. Run with: bicop tables
 """
 
 import csv
@@ -15,7 +12,6 @@ import numpy as np
 
 from bicop.graphs import random_bipartite
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOL = 1e-5
 
 
@@ -32,11 +28,11 @@ def fixed(x, d):
     return f"{x:.{d}f}"
 
 
-def load():
+def load(data):
     """Random graphs from every results file, one row per (m, k, p, seed)."""
     rows = {}
     for name in ("bounds.csv", "bounds_unbalanced.csv", "random.csv"):
-        path = os.path.join(ROOT, "data", name)
+        path = os.path.join(data, name)
         if os.path.exists(path):
             for r in csv.DictReader(open(path)):
                 if r["family"] == "random" and r["k1"] not in ("", "nan"):
@@ -62,9 +58,9 @@ GAPS = (r"relative gap $(\text{bound}-\frac12\sqrt g)/\frac12\sqrt g$ in percent
 BLOCKS = (("balanced, $m_1=m_2$", lambda m, k: m == k), ("unbalanced, $m_1<m_2$", lambda m, k: m < k))
 
 
-def by_size():
+def by_size(data):
     sizes = defaultdict(list)
-    for r in load():
+    for r in load(data):
         sizes[(int(r["m"]), int(r["k"]))].append(r)
     return sizes
 
@@ -76,9 +72,9 @@ def blocks(sizes):
             yield label, block
 
 
-def main():
+def bounds_by_size(data, tables):
     """Table 1 (Section 7): one row per size, the three edge probabilities together."""
-    sizes = by_size()
+    sizes = by_size(data)
     out = [r"\begin{table}[H]", r"\centering\small\setlength{\tabcolsep}{3.5pt}",
            r"\caption{Random bipartite graphs with $|V_1|=m_1$ and $|V_2|=m_2$, with the edge probabilities $p=0.3$, $0.5$ and "
            r"$0.7$ together (Table~\ref{tbl-random-p} separates them); \# is the number of graphs. "
@@ -92,12 +88,12 @@ def main():
         out += [r"\midrule", rf"\multicolumn{{11}}{{@{{}}l}}{{\emph{{{label}}}}}\\"]
         out += [" & ".join([f"${m}+{k}$"] + cells(sizes[(m, k)])) + r"\\" for m, k in block]
     out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
-    open(os.path.join(ROOT, "tables", "bounds_by_size.tex"), "w").write("\n".join(out) + "\n")
+    open(os.path.join(tables, "bounds_by_size.tex"), "w").write("\n".join(out) + "\n")
 
 
-def per_probability():
+def bounds_by_probability(data, tables):
     """Table B.1 (Appendix B): the same, for each size and each edge probability."""
-    sizes = by_size()
+    sizes = by_size(data)
     out = [r"\begin{table}[p]", r"\centering\footnotesize\setlength{\tabcolsep}{3.2pt}",
            r"\caption{The random graphs of Table~\ref{tbl-random}, for each size and each edge probability $p$; "
            r"the three probabilities together are in Table~\ref{tbl-random}. "
@@ -117,12 +113,12 @@ def per_probability():
                 first = f"${m}+{k}$" if j == 0 else ""
                 out.append(" & ".join([first, f"${p:g}$"] + cells([r for r in G if float(r["p"]) == p])) + r"\\")
     out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
-    open(os.path.join(ROOT, "tables", "bounds_by_probability.tex"), "w").write("\n".join(out) + "\n")
+    open(os.path.join(tables, "bounds_by_probability.tex"), "w").write("\n".join(out) + "\n")
 
 
-def matchings():
+def matchings(data, tables):
     """Table 2: the bounds on the perfect matchings M_r."""
-    rows = [r for r in csv.DictReader(open(os.path.join(ROOT, "data", "bounds.csv"))) if r["family"] == "matching"]
+    rows = [r for r in csv.DictReader(open(os.path.join(data, "bounds.csv"))) if r["family"] == "matching"]
     out = [r"\begin{table}[H]", r"\centering\small",
            r"\caption{The bounds on the perfect matchings $M_r$, $2\le r\le12$, on which one of them is not exact, that is, for odd $r$; "
            r"there $\frac12\sqrt g=\frac14\sqrt{r^2-1}$, while for even $r$ all bounds equal $r/4$.}\label{tbl-matchings}",
@@ -134,7 +130,7 @@ def matchings():
             continue  # every bound is exact
         out.append(" & ".join([f"${r['m']}$"] + [f"${v:.4f}$" for v in vals]) + r"\\")
     out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
-    open(os.path.join(ROOT, "tables", "matchings.tex"), "w").write("\n".join(out) + "\n")
+    open(os.path.join(tables, "matchings.tex"), "w").write("\n".join(out) + "\n")
 
 
 def biadjacency(r):
@@ -148,9 +144,9 @@ def biadjacency(r):
     return B
 
 
-def thresholds():
+def thresholds(data, tables):
     """Table 3: the smallest valid penalty gamma* against the thresholds of Theorem 4.3 and of Gillis and Glineur."""
-    rows = list(csv.DictReader(open(os.path.join(ROOT, "data", "partA_threshold.csv"))))
+    rows = list(csv.DictReader(open(os.path.join(data, "partA_threshold.csv"))))
     ours = lambda r: float(r["bound_sqrt_g"])
     # Gillis-Glineur, Lemma 3: 2*gamma - 1 >= sqrt of the number of edges of the bipartite complement
     lemma3 = lambda r: (1 + np.sqrt(int(r["m"]) * int(r["k"]) - int(r["edges"]))) / 2
@@ -187,12 +183,12 @@ def thresholds():
         out.append(f"$N_{{{r['k']}}}$ & & \\multicolumn{{2}}{{c}}{{${a:.3f}$}} & \\multicolumn{{2}}{{c}}{{${b:.3f}$}}"
                    f" & \\multicolumn{{2}}{{c}}{{${c:.3f}$}} & \\multicolumn{{2}}{{c}}{{${d:.3f}$}}" + r"\\")
     out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
-    open(os.path.join(ROOT, "tables", "thresholds.tex"), "w").write("\n".join(out) + "\n")
+    open(os.path.join(tables, "thresholds.tex"), "w").write("\n".join(out) + "\n")
 
 
-def ascent():
+def local_ascent(data, tables):
     """Table 4: block-coordinate ascent on (7) from 100 random starts, for the four penalties."""
-    rows = list(csv.DictReader(open(os.path.join(ROOT, "data", "local_ascent.csv"))))
+    rows = list(csv.DictReader(open(os.path.join(data, "local_ascent.csv"))))
     groups = defaultdict(list)
     for r in rows:
         groups[(int(r["m"]), float(r["p"]), r["threshold"])].append(float(r["success"]))
@@ -212,13 +208,13 @@ def ascent():
             cells = [f"${np.mean(groups[(m, p, t)]):.3f}$ & ${sum(x > 0 for x in groups[(m, p, t)])}$" for t in names]
             out.append(f"${m}+{m}$ & ${p}$ & " + " & ".join(cells) + r"\\")
     out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
-    open(os.path.join(ROOT, "tables", "local_ascent.tex"), "w").write("\n".join(out) + "\n")
+    open(os.path.join(tables, "local_ascent.tex"), "w").write("\n".join(out) + "\n")
 
 
-if __name__ == "__main__":
-    os.makedirs(os.path.join(ROOT, "tables"), exist_ok=True)
-    main()
-    per_probability()
-    matchings()
-    thresholds()
-    ascent()
+def build(data, tables):
+    os.makedirs(tables, exist_ok=True)
+    bounds_by_size(data, tables)
+    bounds_by_probability(data, tables)
+    matchings(data, tables)
+    thresholds(data, tables)
+    local_ascent(data, tables)

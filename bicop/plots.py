@@ -1,6 +1,4 @@
-"""Figure 1 of the paper: the Pólya bounds zeta^(r) by level, from data/polya_levels.csv (no solver).
-
-Run from code/:  python plots.py
+"""Figure 1 of the paper: the Pólya bounds zeta^(r) by level, from polya_levels.csv (no solver). Run with: bicop plots
 Drawn at printed size (text width about 4.6 in) with the paper's fonts; included without rescaling.
 """
 
@@ -16,7 +14,6 @@ import matplotlib
 matplotlib.use("pdf")
 import matplotlib.pyplot as plt
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INK, MUTED = "#0b0b0b", "#52514e"
 SERIES = [("matching-3", r"$M_3$, and $2+2$ with one edge", "#2a78d6", "o"),
           ("matching-4", r"$M_4$", "#eb6834", "s"),
@@ -42,16 +39,16 @@ def paper_style():
                          "xtick.labelsize": 7, "ytick.labelsize": 7, "pdf.fonttype": 42, "axes.linewidth": 0.6})
 
 
-def polya_levels():
+def polya_levels(data, figures):
     """zeta^(r) / (sqrt(g)/2) against r; levels where the program is infeasible are not drawn."""
-    data = defaultdict(list)
-    for r in csv.DictReader(open(os.path.join(ROOT, "data", "polya_levels.csv"))):
-        data[r["graph"]].append((int(r["r"]), float(r["zeta"]) / float(r["half_sqrt_g"])))
+    ratios = defaultdict(list)
+    for r in csv.DictReader(open(os.path.join(data, "polya_levels.csv"))):
+        ratios[r["graph"]].append((int(r["r"]), float(r["zeta"]) / float(r["half_sqrt_g"])))
     fig, ax = plt.subplots(figsize=(4.6, 2.3), constrained_layout=True)
     ax.axhline(1, color=MUTED, lw=0.8, ls="--")
     ax.text(-0.2, 1.06, r"value $\frac{1}{2}\sqrt{g}$", va="bottom", ha="left", fontsize=6.5, color=MUTED)
     for key, label, color, marker in SERIES:
-        pts = sorted((r, v) for r, v in data[key] if math.isfinite(v))
+        pts = sorted((r, v) for r, v in ratios[key] if math.isfinite(v))
         ax.plot([r for r, _ in pts], [v for _, v in pts], color=color, lw=1.4, marker=marker, ms=4.5,
                 mec="white", mew=0.6, label=label)
     ax.set_xticks(range(8))
@@ -63,10 +60,10 @@ def polya_levels():
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(axis="y", alpha=0.25, lw=0.4)
     ax.set_axisbelow(True)
-    os.makedirs(os.path.join(ROOT, "figures"), exist_ok=True)
-    fig.savefig(os.path.join(ROOT, "figures", "polya_levels.pdf"))
+    os.makedirs(figures, exist_ok=True)
+    fig.savefig(os.path.join(figures, "polya_levels.pdf"))
 
 
-if __name__ == "__main__":
+def build(data, figures):
     paper_style()
-    polya_levels()
+    polya_levels(data, figures)
