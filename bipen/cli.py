@@ -15,7 +15,7 @@ EXPERIMENTS = {
     "random-graphs": "the 3000 random graphs, about 60 CPU hours (random.csv)",
     "k1-check": "the random graphs where kappa^(1) is not exact, at tolerance 1e-10 (k1_check.csv)",
     "lasserre-compare": "kappa^(1) against the Lasserre bound g_2 (lasserre.csv, or lasserre<size>.csv)",
-    "local-ascent": "block-coordinate ascent with eight penalties and two kinds of starts (local_ascent.csv)",
+    "local-ascent": "block-coordinate ascent with seven penalties and two kinds of starts (local_ascent.csv)",
     "partA-threshold": "the smallest valid penalty gamma* (partA_threshold.csv)",
     "smallest-dnn-gap": "small graphs where the DNN bound is not exact (smallest_dnn_gap.txt)",
     "polya-finiteness": "the first finite Polya level against alpha* - 1 (polya_finiteness.csv)",

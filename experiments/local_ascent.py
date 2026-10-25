@@ -1,14 +1,15 @@
 """Block-coordinate ascent on max x^T (J - 2 gamma W) y over nonnegative unit vectors, on the first 20 random graphs
 of the sizes 10+10, 15+15 and 20+20 and each p, from two kinds of starts: 100 random points (numpy.random.default_rng(s)
 for the graph with seed index s) and the n vertices (y = e_j or x = e_i). Penalties: gamma_1 = (1 + sqrt g)/2,
-gamma_k = 1/2 + kappa^(1) (from random.csv), gamma_4 = (1 + |J - W|_2)/2, gamma_3 = (1 + sqrt|E(G^)|)/2,
+which rounding kappa^(1) (from random.csv) gives on every graph, gamma_4 = (1 + |J - W|_2)/2, gamma_3 = (1 + sqrt|E(G^)|)/2,
 gamma_2 = (1 + max(m, k))/2, and the penalties 1/2 + c sqrt(g)/2 below gamma_1 for c = 1/4, 1/2, 3/4 (gamma_c25, ...).
 
 Per graph, penalty and kind of start: success, the fraction of runs whose supports form a maximum biindependent pair
 (for gamma >= gamma_1 these are the runs that end at value sqrt(g); below gamma_1 a run can exceed sqrt(g) with an
 edge in its support); repaired, the fraction that reach g after the greedy repair of penalty.repair; edge, nonmaximal
 and maximal, the fractions of runs that end with an edge of G in the support, at a biindependent pair that is not
-maximal, and at a maximal pair that is not maximum (penalty.end_state); fallback, the fraction whose first step finds
+maximal, and at a maximal pair that is not maximum (penalty.end_state); edge_positive, the fraction that end with an
+edge in the support and a positive value; fallback, the fraction whose first step finds
 (M y)_+ = 0 and moves to a vertex; support, the mean fraction of the side in the support after the first step; steps.
 Writes local_ascent.csv in the data folder.
 
@@ -59,7 +60,8 @@ def job(args):
     m, p, s = args
     B = random_bipartite(m, m, p, np.random.default_rng(seed(m, m, p, s))).astype(bool)
     g = parameters(B)["g"]
-    thresholds = {"gamma1": (1 + np.sqrt(g)) / 2, "gammak": 0.5 + KAPPA[(m, m, p, s)],
+    assert np.floor(4 * KAPPA[(m, m, p, s)] ** 2 + 1e-6) == g  # rounding kappa^(1) gives g, so gamma_1 is computable
+    thresholds = {"gamma1": (1 + np.sqrt(g)) / 2,
                   "gamma4": (1 + np.linalg.norm(1 - B, 2)) / 2,
                   "gamma3": (1 + np.sqrt((1 - B).sum())) / 2, "gamma2": (1 + m) / 2}
     thresholds.update({f"gamma_c{int(100 * c)}": 0.5 + c * np.sqrt(g) / 2 for c in (0.25, 0.5, 0.75)})
@@ -80,6 +82,7 @@ def job(args):
                          "success": np.mean([e == "optimal" for e in ends]),
                          "repaired": np.mean([repair(B, x, y) == g for x, y, *_ in runs]),
                          "edge": np.mean([e == "edge" for e in ends]),
+                         "edge_positive": np.mean([e == "edge" and r[2] > 0 for e, r in zip(ends, runs)]),
                          "nonmaximal": np.mean([e == "nonmaximal" for e in ends]),
                          "maximal": np.mean([e == "maximal" for e in ends]),
                          "fallback": np.mean([a.max() <= 0 for *_, a in runs]),
