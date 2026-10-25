@@ -20,6 +20,7 @@ EXPERIMENTS = {
     "smallest-dnn-gap": "small graphs where the DNN bound is not exact (smallest_dnn_gap.txt)",
     "polya-finiteness": "the first finite Polya level against alpha* - 1 (polya_finiteness.csv)",
     "polya-levels": "the Polya bounds by level (polya_levels.csv)",
+    "dsos-levels": "the DSOS bounds by level (dsos_levels.csv)",
     "solver-bench": "MOSEK against Clarabel (solver_bench.csv)",
     "five-vertices": "exact check of the five-vertex certificates (prints only)",
 }
