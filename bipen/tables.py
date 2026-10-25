@@ -85,7 +85,7 @@ def blocks(sizes):
 def bounds_by_size(data, tables):
     """Table 1 (Section 7): one row per size, the three edge probabilities together."""
     sizes = by_size(data)
-    out = [r"\begin{table}[H]", r"\centering\small\setlength{\tabcolsep}{3.5pt}",
+    out = [r"\begin{table}[tbp]", r"\centering\small\setlength{\tabcolsep}{3.5pt}",
            r"\caption{Random bipartite graphs with $|V_1|=m_1$ and $|V_2|=m_2$, with the edge probabilities $p=0.3$, $0.5$ and "
            r"$0.7$ together ({\hyperref[tbl-random-p]{Table~\ref*{tbl-random-p}}} separates them); \# is the number of graphs. "
            r"Columns 3--5: number of graphs on which the bound is within $10^{-5}$ of $\frac12\sqrt g$. "
@@ -129,7 +129,7 @@ def bounds_by_probability(data, tables):
 def matchings(data, tables):
     """Table 2: the bounds on the perfect matchings M_r."""
     rows = [r for r in csv.DictReader(open(os.path.join(data, "bounds.csv"))) if r["family"] == "matching"]
-    out = [r"\begin{table}[H]", r"\centering\small",
+    out = [r"\begin{table}[tbp]", r"\centering\small",
            r"\caption{The bounds on the perfect matchings $M_r$, $2\le r\le12$, on which one of them is not exact, that is, for odd $r$; "
            r"there $\frac12\sqrt g=\frac14\sqrt{r^2-1}$, while for even $r$ all bounds equal $\frac r4$.}\label{tbl-matchings}",
            r"\begin{tabular}{@{}rrrrr@{}}", r"\toprule",
@@ -161,7 +161,7 @@ def thresholds(data, tables):
     # Gillis-Glineur, Lemma 3: 2*gamma - 1 >= sqrt of the number of edges of the bipartite complement
     lemma3 = lambda r: (1 + np.sqrt(int(r["m"]) * int(r["k"]) - int(r["edges"]))) / 2
     spectral = lambda r: (1 + np.linalg.norm(1 - biadjacency(r), 2)) / 2
-    out = [r"\begin{table}[H]", r"\centering\small",
+    out = [r"\begin{table}[tbp]", r"\centering\small",
            r"\caption{Ratios of the thresholds $\gamma^*$ and $\gamma_1$ to $\gamma_4$, computed graph by graph, with their mean and maximum or "
            r"minimum over the random graphs of each size and their value on the graphs $N_k$.}\label{tbl-threshold}",
            r"\begin{tabular}{@{}lrrrrrrrrr@{}}", r"\toprule",
@@ -206,7 +206,7 @@ def local_ascent(data, tables):
 
     names = ["gamma1", "gamma4", "gamma3", "gamma2"]
     labels = {"gamma1": r"\gamma_1", "gamma4": r"\gamma_4", "gamma3": r"\gamma_3", "gamma2": r"\gamma_2"}
-    out = [r"\begin{table}[H]", r"\centering\small\setlength{\tabcolsep}{5pt}",
+    out = [r"\begin{table}[tbp]", r"\centering\small\setlength{\tabcolsep}{5pt}",
            r"\caption{Fraction of starts from which the local ascent ends at a maximum pair, and graphs (of $20$) where some start does, with the penalties $\gamma_1$, which rounding $\kappa^{\left(1\right)}$ gives, $\gamma_4$, $\gamma_3$ and $\gamma_2$."
            r"}\label{tbl-ascent}",
            r"\begin{tabular}{@{}lrrrrrrrrr@{}}", r"\toprule",
