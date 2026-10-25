@@ -220,7 +220,7 @@ def local_ascent(data, tables):
     labels = {"gamma_c25": r"c=\frac14", "gamma_c50": r"c=\frac12", "gamma_c75": r"c=\frac34", "gamma1": r"c=1"}
     pct = lambda key, col: f"${np.mean([float(r[col]) for r in groups[key]]):.3f}$"
     out = [r"\begin{table}[H]", r"\centering\small\setlength{\tabcolsep}{5pt}",
-           r"\caption{Local ascent from random starts with the penalties $\frac12+\frac c2\sqrt g$: fraction of starts that end at a maximum pair, before and after repair."
+           r"\caption{Fraction of random starts from which the local ascent ends at a maximum pair, without and with the greedy repair, for the penalties $\gamma=\frac12\left(1+c\sqrt g\right)$; $c=1$ gives $\gamma_1$."
            r"}\label{tbl-ascent-below}",
            r"\begin{tabular}{@{}lrrrrrrrrr@{}}", r"\toprule",
            "& & " + " & ".join(rf"\multicolumn{{2}}{{c}}{{${labels[t]}$}}" for t in names) + r"\\",
