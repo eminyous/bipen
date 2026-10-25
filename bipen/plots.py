@@ -46,7 +46,7 @@ def polya_levels(data, figures):
         ratios[r["graph"]].append((int(r["r"]), float(r["zeta"]) / float(r["half_sqrt_g"])))
     fig, ax = plt.subplots(figsize=(4.6, 2.3), constrained_layout=True)
     ax.axhline(1, color=MUTED, lw=0.8, ls="--")
-    ax.text(-0.2, 1.06, r"value $\frac{1}{2}\sqrt{g}$", va="bottom", ha="left", fontsize=6.5, color=MUTED)
+    ax.text(-0.2, 1.06, r"value $\frac{1}{2}\sqrt{g}$", va="bottom", ha="left", fontsize=7, color=MUTED)
     for key, label, color, marker in SERIES:
         pts = sorted((r, v) for r, v in ratios[key] if math.isfinite(v))
         ax.plot([r for r, _ in pts], [v for _, v in pts], color=color, lw=1.4, marker=marker, ms=4.5,
@@ -55,7 +55,7 @@ def polya_levels(data, figures):
     ax.set_xlim(-0.3, 7.3)
     ax.set_ylim(0.8, 3.3)
     ax.set_xlabel("level $r$")
-    ax.set_ylabel(r"$\zeta^{(r)}\,/\,\frac{1}{2}\sqrt{g}$")
+    ax.set_ylabel(r"ratio to $\frac{1}{2}\sqrt{g}$")
     ax.legend(loc="upper right", frameon=False, fontsize=6.5, handlelength=1.8)
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(axis="y", alpha=0.25, lw=0.4)
