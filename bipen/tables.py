@@ -156,7 +156,8 @@ def thresholds(data, tables):
            r"Theorem~\ref{thm-penalty}, the thresholds $\gamma_2=\left(1+\max\left(m_1,m_2\right)\right)/2$ and $\gamma_3=\bigl(1+\sqrt{|E(\widehat G)|}\bigr)/2$ "
            r"of \cite[Theorem 2 and Lemma 3]{gillis2014continuous}, and $\gamma_4=\left(1+\|J-W\|_2\right)/2$, "
            r"on random graphs ($100$ for each edge probability $p=0.2$, $0.4$, $0.6$ and $0.8$, without the empty and complete ones) and on the graphs $N_k$ "
-           r"of Proposition~\ref{prp-sharp}.}\label{tbl-threshold}",
+           r"of Proposition~\ref{prp-sharp}. The ratios are computed for each graph; the table gives their mean and their maximum or minimum over the "
+           r"graphs of each size.}\label{tbl-threshold}",
            r"\begin{tabular}{@{}lrrrrrrrrr@{}}", r"\toprule",
            r"& & \multicolumn{2}{c}{$\gamma^*/\gamma_1$} & \multicolumn{2}{c}{$\gamma_1/\gamma_2$} & \multicolumn{2}{c}{$\gamma_1/\gamma_3$}"
            r" & \multicolumn{2}{c}{$\gamma_1/\gamma_4$}\\",
