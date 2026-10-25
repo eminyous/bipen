@@ -160,8 +160,8 @@ def thresholds(data, tables):
            r"of {\hyperref[prp-sharp]{Proposition~\ref*{prp-sharp}}}. The ratios are computed for each graph; the table gives their mean and their maximum or minimum over the "
            r"graphs of each size.}\label{tbl-threshold}",
            r"\begin{tabular}{@{}lrrrrrrrrr@{}}", r"\toprule",
-           r"& & \multicolumn{2}{c}{$\frac{\gamma^*}{\gamma_1}$} & \multicolumn{2}{c}{$\frac{\gamma_1}{\gamma_2}$} & \multicolumn{2}{c}{$\frac{\gamma_1}{\gamma_3}$}"
-           r" & \multicolumn{2}{c}{$\frac{\gamma_1}{\gamma_4}$}\\",
+           r"\rule[-2.2ex]{0pt}{5.6ex}& & \multicolumn{2}{c}{$\dfrac{\gamma^*}{\gamma_1}$} & \multicolumn{2}{c}{$\dfrac{\gamma_1}{\gamma_2}$}"
+           r" & \multicolumn{2}{c}{$\dfrac{\gamma_1}{\gamma_3}$} & \multicolumn{2}{c}{$\dfrac{\gamma_1}{\gamma_4}$}\\",
            r"\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(l){9-10}",
            r"$G$ & \# & mean & max & mean & min & mean & min & mean & min\\", r"\midrule"]
     groups = defaultdict(list)
