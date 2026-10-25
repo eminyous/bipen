@@ -198,7 +198,7 @@ def thresholds(data, tables):
 
 
 def local_ascent(data, tables):
-    """Table 4: block-coordinate ascent on (7) with the four penalties, from random starts (p = 0.3 and 0.5) and from
+    """Table 4: block-coordinate ascent on (7) with gamma_1 and the three larger penalties, from random starts (p = 0.3 and 0.5) and from
     the vertices; Table C.2 (Appendix C): random starts with the penalties 1/2 + c sqrt(g)/2, before and after repair."""
     rows = list(csv.DictReader(open(os.path.join(data, "local_ascent.csv"))))
     groups = defaultdict(list)
@@ -208,8 +208,8 @@ def local_ascent(data, tables):
     cell = lambda key, col: (f"${mean3([r[col] for r in groups[key]])}$ & "
                              f"${sum(float(r[col]) > 0 for r in groups[key])}$")
 
-    names = ["gammak", "gamma4", "gamma3", "gamma2"]
-    labels = {"gammak": r"\gamma_\kappa", "gamma4": r"\gamma_4", "gamma3": r"\gamma_3", "gamma2": r"\gamma_2"}
+    names = ["gamma1", "gamma4", "gamma3", "gamma2"]
+    labels = {"gamma1": r"\gamma_1", "gamma4": r"\gamma_4", "gamma3": r"\gamma_3", "gamma2": r"\gamma_2"}
     out = [r"\begin{table}[H]", r"\centering\small\setlength{\tabcolsep}{5pt}",
            r"\caption{Fraction of starts from which the local ascent ends at a maximum pair, and graphs (of $20$) where some start does, with the penalties $\gamma_1$, which rounding $\kappa^{\left(1\right)}$ gives, $\gamma_4$, $\gamma_3$ and $\gamma_2$."
            r"}\label{tbl-ascent}",
