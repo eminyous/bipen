@@ -77,7 +77,7 @@ def bounds_by_size(data, tables):
     sizes = by_size(data)
     out = [r"\begin{table}[H]", r"\centering\small\setlength{\tabcolsep}{3.5pt}",
            r"\caption{Random bipartite graphs with $|V_1|=m_1$ and $|V_2|=m_2$, with the edge probabilities $p=0.3$, $0.5$ and "
-           r"$0.7$ together (Table~\ref{tbl-random-p} separates them); \# is the number of graphs. "
+           r"$0.7$ together ({\hyperref[tbl-random-p]{Table~\ref*{tbl-random-p}}} separates them); \# is the number of graphs. "
            r"Columns 3--5: number of graphs on which the bound is within $10^{-5}$ of $\frac12\sqrt g$. "
            r"Columns 6--11: " + GAPS + r".}\label{tbl-random}",
            r"\begin{tabular}{@{}rrrrrrrrrrr@{}}", r"\toprule",
@@ -95,8 +95,8 @@ def bounds_by_probability(data, tables):
     """Table B.1 (Appendix B): the same, for each size and each edge probability."""
     sizes = by_size(data)
     out = [r"\begin{table}[p]", r"\centering\footnotesize\setlength{\tabcolsep}{3.2pt}",
-           r"\caption{The random graphs of Table~\ref{tbl-random}, for each size and each edge probability $p$; "
-           r"the three probabilities together are in Table~\ref{tbl-random}. "
+           r"\caption{The random graphs of {\hyperref[tbl-random]{Table~\ref*{tbl-random}}}, for each size and each edge probability $p$; "
+           r"the three probabilities together are in {\hyperref[tbl-random]{Table~\ref*{tbl-random}}}. "
            r"Columns 4--6: number of graphs on which the bound is within $10^{-5}$ of $\frac12\sqrt g$. "
            r"Columns 7--12: " + GAPS + r".}\label{tbl-random-p}",
            r"\begin{tabular}{@{}rrrrrrrrrrrr@{}}", r"\toprule",
@@ -153,10 +153,10 @@ def thresholds(data, tables):
     spectral = lambda r: (1 + np.linalg.norm(1 - biadjacency(r), 2)) / 2
     out = [r"\begin{table}[H]", r"\centering\small",
            r"\caption{The smallest valid penalty $\gamma^*$ against the threshold $\gamma_1=\frac12\left(1+\sqrt g\right)$ of "
-           r"Theorem~\ref{thm-penalty}, the thresholds $\gamma_2=\frac12\left(1+\max\left(m_1,m_2\right)\right)$ and $\gamma_3=\frac12\left(1+\sqrt{|E\left(\widehat G\right)|}\right)$ "
+           r"{\hyperref[thm-penalty]{Theorem~\ref*{thm-penalty}}}, the thresholds $\gamma_2=\frac12\left(1+\max\left(m_1,m_2\right)\right)$ and $\gamma_3=\frac12\left(1+\sqrt{|E\left(\widehat G\right)|}\right)$ "
            r"of \cite[Theorem 2 and Lemma 3]{gillis2014continuous}, and $\gamma_4=\frac12\left(1+\|J-U\|_2\right)$, "
            r"on random graphs ($100$ for each edge probability $p=0.2$, $0.4$, $0.6$ and $0.8$, without the empty and complete ones) and on the graphs $N_k$ "
-           r"of Proposition~\ref{prp-sharp}. The ratios are computed for each graph; the table gives their mean and their maximum or minimum over the "
+           r"of {\hyperref[prp-sharp]{Proposition~\ref*{prp-sharp}}}. The ratios are computed for each graph; the table gives their mean and their maximum or minimum over the "
            r"graphs of each size.}\label{tbl-threshold}",
            r"\begin{tabular}{@{}lrrrrrrrrr@{}}", r"\toprule",
            r"& & \multicolumn{2}{c}{$\frac{\gamma^*}{\gamma_1}$} & \multicolumn{2}{c}{$\frac{\gamma_1}{\gamma_2}$} & \multicolumn{2}{c}{$\frac{\gamma_1}{\gamma_3}$}"
