@@ -243,11 +243,11 @@ def dsos_levels(data, tables):
     rows = list(csv.DictReader(open(os.path.join(data, "dsos_levels.csv"))))
     levels = sorted({int(r["r"]) for r in rows})
     out = [r"\begin{table}[H]", r"\centering\small",
-           r"\caption{The DSOS bounds $\zeta_{\mathcal L}^{\left(r\right)}$ on the graphs of "
+           r"\caption{The DSOS bounds $\zeta_{\DSOS}^{\left(r\right)}$ on the graphs of "
            r"{\hyperref[fig-polya]{Figure~\ref*{fig-polya}}} and on the graph $N_2$ of "
            r"{\hyperref[prp-sharp]{Proposition~\ref*{prp-sharp}}}.}\label{tbl-dsos}",
            r"\begin{tabular}{@{}l" + "r" * (len(levels) + 1) + r"@{}}", r"\toprule",
-           rf"& & \multicolumn{{{len(levels)}}}{{c}}{{$\zeta_{{\mathcal L}}^{{\left(r\right)}}$}}\\",
+           rf"& & \multicolumn{{{len(levels)}}}{{c}}{{$\zeta_{{\DSOS}}^{{\left(r\right)}}$}}\\",
            rf"\cmidrule(l){{3-{len(levels) + 2}}}",
            r"$G$ & $\frac12\sqrt g$" + "".join(f" & $r={r}$" for r in levels) + r"\\", r"\midrule"]
     for key, label in DSOS_ROWS:
