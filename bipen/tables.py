@@ -53,8 +53,8 @@ def cells(G):
     return [f"${len(G)}$"] + exact + [f"${fixed(v, d)}$" for v, d in zip(values, DECIMALS)]
 
 
-HEADER = (r"\# & $h_1$ & $\eta_1(\cdot;\DNN)$ & $\kappa^{(1)}$ & $h_1$ & $\eta_1(\cdot;\DNN)$ & $\kappa^{(1)}$ & $h_1$ & $\eta_1(\cdot;\DNN)$ & $\kappa^{(1)}$\\")
-GAPS = (r"relative gap $\frac{\text{bound}-\frac12\sqrt g}{\frac12\sqrt g}$ in percent, mean and maximum over the graphs of the row")
+HEADER = (r"\# & $h_1$ & $\eta_1\left(\cdot;\DNN\right)$ & $\kappa^{\left(1\right)}$ & $h_1$ & $\eta_1\left(\cdot;\DNN\right)$ & $\kappa^{\left(1\right)}$ & $h_1$ & $\eta_1\left(\cdot;\DNN\right)$ & $\kappa^{\left(1\right)}$\\")
+GAPS = (r"gap of the bound relative to $\frac12\sqrt g$, in percent, mean and maximum over the graphs of the row")
 BLOCKS = (("balanced, $m_1=m_2$", lambda m, k: m == k), ("unbalanced, $m_1<m_2$", lambda m, k: m < k))
 
 
@@ -123,7 +123,7 @@ def matchings(data, tables):
            r"\caption{The bounds on the perfect matchings $M_r$, $2\le r\le12$, on which one of them is not exact, that is, for odd $r$; "
            r"there $\frac12\sqrt g=\frac14\sqrt{r^2-1}$, while for even $r$ all bounds equal $\frac r4$.}\label{tbl-matchings}",
            r"\begin{tabular}{@{}rrrrr@{}}", r"\toprule",
-           r"$r$ & $\frac12\sqrt g$ & $h_1$ & $\eta_1(\cdot;\DNN)$ & $\kappa^{(1)}$\\", r"\midrule"]
+           r"$r$ & $\frac12\sqrt g$ & $h_1$ & $\eta_1\left(\cdot;\DNN\right)$ & $\kappa^{\left(1\right)}$\\", r"\midrule"]
     for r in sorted(rows, key=lambda r: int(r["m"])):
         vals = [float(r[k]) for k in ("half_sqrt_g", "h1", "h1_dnn", "k1")]
         if max(vals[1:]) - vals[0] < TOL:
@@ -153,7 +153,7 @@ def thresholds(data, tables):
     spectral = lambda r: (1 + np.linalg.norm(1 - biadjacency(r), 2)) / 2
     out = [r"\begin{table}[H]", r"\centering\small",
            r"\caption{The smallest valid penalty $\gamma^*$ against the threshold $\gamma_1=\frac12\left(1+\sqrt g\right)$ of "
-           r"Theorem~\ref{thm-penalty}, the thresholds $\gamma_2=\frac12\left(1+\max\left(m_1,m_2\right)\right)$ and $\gamma_3=\frac12\bigl(1+\sqrt{|E(\widehat G)|}\bigr)$ "
+           r"Theorem~\ref{thm-penalty}, the thresholds $\gamma_2=\frac12\left(1+\max\left(m_1,m_2\right)\right)$ and $\gamma_3=\frac12\left(1+\sqrt{|E\left(\widehat G\right)|}\right)$ "
            r"of \cite[Theorem 2 and Lemma 3]{gillis2014continuous}, and $\gamma_4=\frac12\left(1+\|J-U\|_2\right)$, "
            r"on random graphs ($100$ for each edge probability $p=0.2$, $0.4$, $0.6$ and $0.8$, without the empty and complete ones) and on the graphs $N_k$ "
            r"of Proposition~\ref{prp-sharp}. The ratios are computed for each graph; the table gives their mean and their maximum or minimum over the "
@@ -201,7 +201,7 @@ def local_ascent(data, tables):
     names = ["gammak", "gamma4", "gamma3", "gamma2"]
     labels = {"gammak": r"\gamma_\kappa", "gamma4": r"\gamma_4", "gamma3": r"\gamma_3", "gamma2": r"\gamma_2"}
     out = [r"\begin{table}[H]", r"\centering\small\setlength{\tabcolsep}{5pt}",
-           r"\caption{Local ascent with $\gamma_\kappa=\frac12+\kappa^{(1)}$, $\gamma_4$, $\gamma_3$ and $\gamma_2$: fraction of starts that end at a maximum pair, and graphs (of $20$) where some start does."
+           r"\caption{Local ascent with $\gamma_\kappa=\frac12+\kappa^{\left(1\right)}$, $\gamma_4$, $\gamma_3$ and $\gamma_2$: fraction of starts that end at a maximum pair, and graphs (of $20$) where some start does."
            r"}\label{tbl-ascent}",
            r"\begin{tabular}{@{}lrrrrrrrrr@{}}", r"\toprule",
            "& & " + " & ".join(rf"\multicolumn{{2}}{{c}}{{${labels[t]}$}}" for t in names) + r"\\",
