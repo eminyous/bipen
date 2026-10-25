@@ -75,3 +75,14 @@ def test_ascent_stays_at_an_optimal_pair():
     x, y = np.array([1.0, 0, 0]), np.array([0, 1.0, 1.0]) / np.sqrt(2)
     *_, val, _ = ascent(1 - 2 * (1 + np.sqrt(2)) / 2 * B, x, y)
     assert abs(val - np.sqrt(2)) < 1e-9
+
+
+def test_end_state_and_repair():
+    from bipen.penalty import end_state, repair
+
+    B = np.array([[1, 0], [0, 0]], dtype=bool)  # one edge on 2+2 vertices, g = 2
+    x, y = np.array([1.0, 0]), np.array([1.0, 1.0]) / np.sqrt(2)
+    assert end_state(B, 2, x, y) == "edge"
+    assert repair(B, x, y) == 2
+    assert end_state(B, 2, np.array([0, 1.0]), y) == "optimal"
+    assert end_state(B, 2, np.array([0, 1.0]), np.array([1.0, 0])) == "nonmaximal"

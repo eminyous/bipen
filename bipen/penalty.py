@@ -56,3 +56,38 @@ def ascent(M, x, y, iters=10000, tol=1e-12):
             return x, y, new, t + 1
         val = new
     return x, y, val, iters
+
+
+def end_state(B, g, x, y, tol=1e-9):
+    """How an ascent run ends, from the supports S of x and R of y: "optimal" if (S, R) is biindependent with
+    |S||R| = g, "edge" if an edge joins S and R, "maximal" if (S, R) is a maximal biindependent pair that is not
+    maximum, "nonmaximal" otherwise."""
+    S, R = x > tol, y > tol
+    if B[np.ix_(S, R)].any():
+        return "edge"
+    if S.sum() * R.sum() == g:
+        return "optimal"
+    extendable = (~S & ~B[:, R].any(axis=1)).any() or (~R & ~B[S, :].any(axis=0)).any()
+    return "nonmaximal" if extendable else "maximal"
+
+
+def repair(B, x, y, tol=1e-9):
+    """Greedy repair of the supports S of x and R of y: drop the vertex with the most neighbours on the other side
+    until (S, R) is biindependent, then, on the side where it increases |S||R| most, add a vertex of smallest degree
+    that keeps (S, R) biindependent, until it is maximal. Returns |S||R|."""
+    S, R = x > tol, y > tol
+    while B[np.ix_(S, R)].any():
+        a, b = (B[:, R].sum(axis=1) * S), (B[S, :].sum(axis=0) * R)
+        if a.max() >= b.max():
+            S[np.argmax(a)] = False
+        else:
+            R[np.argmax(b)] = False
+    while True:
+        free1 = np.flatnonzero(~S & ~B[:, R].any(axis=1))
+        free2 = np.flatnonzero(~R & ~B[S, :].any(axis=0))
+        if len(free1) == 0 and len(free2) == 0:
+            return int(S.sum() * R.sum())
+        if len(free2) == 0 or (len(free1) > 0 and R.sum() >= S.sum()):
+            S[free1[np.argmin(B[free1].sum(axis=1))]] = True
+        else:
+            R[free2[np.argmin(B[:, free2].sum(axis=0))]] = True
