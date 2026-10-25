@@ -1,5 +1,6 @@
-"""Tables 1 to 4 and B.1 of the note (booktabs), read from a data folder and written to a tables folder:
-bounds_by_size (Table 1), matchings (2), thresholds (3), local_ascent (4) and bounds_by_probability (B.1).
+"""Tables 1 to 4, B.1, C.1 and C.2 of the note (booktabs), read from a data folder and written to a tables folder:
+bounds_by_size (Table 1), matchings (2), thresholds (3), local_ascent (4 and C.2), dsos_levels (B.1) and
+bounds_by_probability (C.1).
 
 Table 1 is from the random graphs in bounds.csv, bounds_unbalanced.csv and random.csv. Run with: bipen tables
 """
@@ -92,7 +93,7 @@ def bounds_by_size(data, tables):
 
 
 def bounds_by_probability(data, tables):
-    """Table B.1 (Appendix B): the same, for each size and each edge probability."""
+    """Table C.1 (Appendix C): the same, for each size and each edge probability."""
     sizes = by_size(data)
     out = [r"\begin{table}[p]", r"\centering\footnotesize\setlength{\tabcolsep}{3.2pt}",
            r"\caption{The random graphs of {\hyperref[tbl-random]{Table~\ref*{tbl-random}}}, for each size and each edge probability $p$; "
@@ -189,7 +190,7 @@ def thresholds(data, tables):
 
 def local_ascent(data, tables):
     """Table 4: block-coordinate ascent on (7) with the four penalties, from random starts (p = 0.3 and 0.5) and from
-    the vertices; Table B.2 (Appendix B): random starts with the penalties 1/2 + c sqrt(g)/2, before and after repair."""
+    the vertices; Table C.2 (Appendix C): random starts with the penalties 1/2 + c sqrt(g)/2, before and after repair."""
     rows = list(csv.DictReader(open(os.path.join(data, "local_ascent.csv"))))
     groups = defaultdict(list)
     for r in rows:
@@ -233,6 +234,30 @@ def local_ascent(data, tables):
     open(os.path.join(tables, "local_ascent_below.tex"), "w").write("\n".join(out) + "\n")
 
 
+DSOS_ROWS = [("matching-3", "$M_3$"), ("lpv-example-1", "one edge on $2+2$ vertices"), ("matching-4", "$M_4$"),
+             ("crown-4", "$K_{4,4}$ minus a perfect matching"), ("near-biclique-2", "$N_2$")]
+
+
+def dsos_levels(data, tables):
+    """Table B.1 (Appendix B): the DSOS bounds by level."""
+    rows = list(csv.DictReader(open(os.path.join(data, "dsos_levels.csv"))))
+    levels = sorted({int(r["r"]) for r in rows})
+    out = [r"\begin{table}[H]", r"\centering\small",
+           r"\caption{The DSOS bounds $\zeta_{\mathcal L}^{\left(r\right)}$ on the graphs of "
+           r"{\hyperref[fig-polya]{Figure~\ref*{fig-polya}}} and on the graph $N_2$ of "
+           r"{\hyperref[prp-sharp]{Proposition~\ref*{prp-sharp}}}.}\label{tbl-dsos}",
+           r"\begin{tabular}{@{}l" + "r" * (len(levels) + 1) + r"@{}}", r"\toprule",
+           rf"& & \multicolumn{{{len(levels)}}}{{c}}{{$\zeta_{{\mathcal L}}^{{\left(r\right)}}$}}\\",
+           rf"\cmidrule(l){{3-{len(levels) + 2}}}",
+           r"$G$ & $\frac12\sqrt g$" + "".join(f" & $r={r}$" for r in levels) + r"\\", r"\midrule"]
+    for key, label in DSOS_ROWS:
+        G = {int(r["r"]): r for r in rows if r["graph"] == key}
+        vals = [float(G[levels[0]]["half_sqrt_g"])] + [float(G[r]["zeta_dsos"]) for r in levels]
+        out.append(" & ".join([label] + [f"${v:.4f}$" for v in vals]) + r"\\")
+    out += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    open(os.path.join(tables, "dsos_levels.tex"), "w").write("\n".join(out) + "\n")
+
+
 def build(data, tables):
     os.makedirs(tables, exist_ok=True)
     bounds_by_size(data, tables)
@@ -240,3 +265,4 @@ def build(data, tables):
     matchings(data, tables)
     thresholds(data, tables)
     local_ascent(data, tables)
+    dsos_levels(data, tables)
