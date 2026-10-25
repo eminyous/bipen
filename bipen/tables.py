@@ -201,11 +201,8 @@ def local_ascent(data, tables):
     names = ["gammak", "gamma4", "gamma3", "gamma2"]
     labels = {"gammak": r"\gamma_\kappa", "gamma4": r"\gamma_4", "gamma3": r"\gamma_3", "gamma2": r"\gamma_2"}
     out = [r"\begin{table}[H]", r"\centering\small\setlength{\tabcolsep}{5pt}",
-           r"\caption{Block-coordinate ascent on \eqref{eq-sigma} on the first $20$ random graphs of each size and edge "
-           r"probability, with the penalty $\gamma_\kappa=\frac12+\kappa^{(1)}$ and the penalties $\gamma_4$, $\gamma_3$ and "
-           r"$\gamma_2$ of Table~\ref{tbl-threshold}, from $100$ random starts and from the $n$ vertices: the fraction of "
-           r"starts that end at a maximum biindependent pair, and the number of graphs on which at least one start does. "
-           r"The random starts at $p=0.7$ are discussed in the text.}\label{tbl-ascent}",
+           r"\caption{Local ascent with $\gamma_\kappa=\frac12+\kappa^{(1)}$, $\gamma_4$, $\gamma_3$ and $\gamma_2$: fraction of starts that end at a maximum pair, and graphs (of $20$) where some start does."
+           r"}\label{tbl-ascent}",
            r"\begin{tabular}{@{}lrrrrrrrrr@{}}", r"\toprule",
            "& & " + " & ".join(rf"\multicolumn{{2}}{{c}}{{${labels[t]}$}}" for t in names) + r"\\",
            r"\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(l){9-10}",
@@ -222,10 +219,8 @@ def local_ascent(data, tables):
     labels = {"gamma_c25": r"c=\frac14", "gamma_c50": r"c=\frac12", "gamma_c75": r"c=\frac34", "gamma1": r"c=1"}
     pct = lambda key, col: f"${np.mean([float(r[col]) for r in groups[key]]):.3f}$"
     out = [r"\begin{table}[H]", r"\centering\small\setlength{\tabcolsep}{5pt}",
-           r"\caption{Block-coordinate ascent from the $100$ random starts of Table~\ref{tbl-ascent}, with the penalties "
-           r"$\frac12+c\sqrt g/2$, which are below the threshold $\gamma_1$ of Theorem~\ref{thm-penalty} for $c<1$: the "
-           r"fraction of starts that end at a maximum biindependent pair, and the fraction that reach $g$ after the greedy "
-           r"repair described in the text.}\label{tbl-ascent-below}",
+           r"\caption{Local ascent from random starts with the penalties $\frac12+c\sqrt g/2$: fraction of starts that end at a maximum pair, before and after repair."
+           r"}\label{tbl-ascent-below}",
            r"\begin{tabular}{@{}lrrrrrrrrr@{}}", r"\toprule",
            "& & " + " & ".join(rf"\multicolumn{{2}}{{c}}{{${labels[t]}$}}" for t in names) + r"\\",
            r"\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(l){9-10}",
