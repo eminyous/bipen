@@ -8,6 +8,8 @@ Table 1 is from the random graphs in bounds.csv, bounds_unbalanced.csv and rando
 import csv
 import os
 from collections import defaultdict
+from decimal import ROUND_HALF_UP, Decimal
+from fractions import Fraction
 
 import numpy as np
 
@@ -27,6 +29,13 @@ def fixed(x, d):
     if x < 10 ** -d:
         return rf"{{<}}0.{'0' * (d - 1)}1"  # positive but below the last printed digit
     return f"{x:.{d}f}"
+
+
+def mean3(values):
+    """Mean of fractions of runs (k/100 or k/(2m)), computed exactly and rounded half up to three decimals, so that
+    ties such as 0.2845 do not depend on the order of the rows."""
+    q = sum(Fraction(v).limit_denominator(1000) for v in values) / len(values)
+    return (Decimal(q.numerator) / Decimal(q.denominator)).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
 
 
 def load(data):
@@ -196,13 +205,13 @@ def local_ascent(data, tables):
     for r in rows:
         groups[(int(r["m"]), float(r["p"]), r["starts"], r["threshold"])].append(r)
     sizes, ps = sorted({k[0] for k in groups}), sorted({k[1] for k in groups})
-    cell = lambda key, col: (f"${np.mean([float(r[col]) for r in groups[key]]):.3f}$ & "
+    cell = lambda key, col: (f"${mean3([r[col] for r in groups[key]])}$ & "
                              f"${sum(float(r[col]) > 0 for r in groups[key])}$")
 
     names = ["gammak", "gamma4", "gamma3", "gamma2"]
     labels = {"gammak": r"\gamma_\kappa", "gamma4": r"\gamma_4", "gamma3": r"\gamma_3", "gamma2": r"\gamma_2"}
     out = [r"\begin{table}[H]", r"\centering\small\setlength{\tabcolsep}{5pt}",
-           r"\caption{Local ascent with $\gamma_\kappa=\frac12+\kappa^{\left(1\right)}$, $\gamma_4$, $\gamma_3$ and $\gamma_2$: fraction of starts that end at a maximum pair, and graphs (of $20$) where some start does."
+           r"\caption{Fraction of starts from which the local ascent ends at a maximum pair, and graphs (of $20$) where some start does, with the penalties $\gamma_1$, which rounding $\kappa^{\left(1\right)}$ gives, $\gamma_4$, $\gamma_3$ and $\gamma_2$."
            r"}\label{tbl-ascent}",
            r"\begin{tabular}{@{}lrrrrrrrrr@{}}", r"\toprule",
            "& & " + " & ".join(rf"\multicolumn{{2}}{{c}}{{${labels[t]}$}}" for t in names) + r"\\",
@@ -218,7 +227,7 @@ def local_ascent(data, tables):
 
     names = ["gamma_c25", "gamma_c50", "gamma_c75", "gamma1"]
     labels = {"gamma_c25": r"c=\frac14", "gamma_c50": r"c=\frac12", "gamma_c75": r"c=\frac34", "gamma1": r"c=1"}
-    pct = lambda key, col: f"${np.mean([float(r[col]) for r in groups[key]]):.3f}$"
+    pct = lambda key, col: f"${mean3([r[col] for r in groups[key]])}$"
     out = [r"\begin{table}[H]", r"\centering\small\setlength{\tabcolsep}{5pt}",
            r"\caption{Fraction of random starts from which the local ascent ends at a maximum pair, without and with the greedy repair, for the penalties $\gamma=\frac12\left(1+c\sqrt g\right)$; $c=1$ gives $\gamma_1$."
            r"}\label{tbl-ascent-below}",
