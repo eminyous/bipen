@@ -54,7 +54,7 @@ def cells(G):
 
 
 HEADER = (r"\# & $h_1$ & $\eta_1(\cdot;\DNN)$ & $\kappa^{(1)}$ & $h_1$ & $\eta_1(\cdot;\DNN)$ & $\kappa^{(1)}$ & $h_1$ & $\eta_1(\cdot;\DNN)$ & $\kappa^{(1)}$\\")
-GAPS = (r"relative gap $(\text{bound}-\frac12\sqrt g)/\frac12\sqrt g$ in percent, mean and maximum over the graphs of the row")
+GAPS = (r"relative gap $\frac{\text{bound}-\frac12\sqrt g}{\frac12\sqrt g}$ in percent, mean and maximum over the graphs of the row")
 BLOCKS = (("balanced, $m_1=m_2$", lambda m, k: m == k), ("unbalanced, $m_1<m_2$", lambda m, k: m < k))
 
 
@@ -121,7 +121,7 @@ def matchings(data, tables):
     rows = [r for r in csv.DictReader(open(os.path.join(data, "bounds.csv"))) if r["family"] == "matching"]
     out = [r"\begin{table}[H]", r"\centering\small",
            r"\caption{The bounds on the perfect matchings $M_r$, $2\le r\le12$, on which one of them is not exact, that is, for odd $r$; "
-           r"there $\frac12\sqrt g=\frac14\sqrt{r^2-1}$, while for even $r$ all bounds equal $r/4$.}\label{tbl-matchings}",
+           r"there $\frac12\sqrt g=\frac14\sqrt{r^2-1}$, while for even $r$ all bounds equal $\frac r4$.}\label{tbl-matchings}",
            r"\begin{tabular}{@{}rrrrr@{}}", r"\toprule",
            r"$r$ & $\frac12\sqrt g$ & $h_1$ & $\eta_1(\cdot;\DNN)$ & $\kappa^{(1)}$\\", r"\midrule"]
     for r in sorted(rows, key=lambda r: int(r["m"])):
@@ -152,15 +152,15 @@ def thresholds(data, tables):
     lemma3 = lambda r: (1 + np.sqrt(int(r["m"]) * int(r["k"]) - int(r["edges"]))) / 2
     spectral = lambda r: (1 + np.linalg.norm(1 - biadjacency(r), 2)) / 2
     out = [r"\begin{table}[H]", r"\centering\small",
-           r"\caption{The smallest valid penalty $\gamma^*$ against the threshold $\gamma_1=\left(1+\sqrt g\right)/2$ of "
-           r"Theorem~\ref{thm-penalty}, the thresholds $\gamma_2=\left(1+\max\left(m_1,m_2\right)\right)/2$ and $\gamma_3=\bigl(1+\sqrt{|E(\widehat G)|}\bigr)/2$ "
-           r"of \cite[Theorem 2 and Lemma 3]{gillis2014continuous}, and $\gamma_4=\left(1+\|J-U\|_2\right)/2$, "
+           r"\caption{The smallest valid penalty $\gamma^*$ against the threshold $\gamma_1=\frac12\left(1+\sqrt g\right)$ of "
+           r"Theorem~\ref{thm-penalty}, the thresholds $\gamma_2=\frac12\left(1+\max\left(m_1,m_2\right)\right)$ and $\gamma_3=\frac12\bigl(1+\sqrt{|E(\widehat G)|}\bigr)$ "
+           r"of \cite[Theorem 2 and Lemma 3]{gillis2014continuous}, and $\gamma_4=\frac12\left(1+\|J-U\|_2\right)$, "
            r"on random graphs ($100$ for each edge probability $p=0.2$, $0.4$, $0.6$ and $0.8$, without the empty and complete ones) and on the graphs $N_k$ "
            r"of Proposition~\ref{prp-sharp}. The ratios are computed for each graph; the table gives their mean and their maximum or minimum over the "
            r"graphs of each size.}\label{tbl-threshold}",
            r"\begin{tabular}{@{}lrrrrrrrrr@{}}", r"\toprule",
-           r"& & \multicolumn{2}{c}{$\gamma^*/\gamma_1$} & \multicolumn{2}{c}{$\gamma_1/\gamma_2$} & \multicolumn{2}{c}{$\gamma_1/\gamma_3$}"
-           r" & \multicolumn{2}{c}{$\gamma_1/\gamma_4$}\\",
+           r"& & \multicolumn{2}{c}{$\frac{\gamma^*}{\gamma_1}$} & \multicolumn{2}{c}{$\frac{\gamma_1}{\gamma_2}$} & \multicolumn{2}{c}{$\frac{\gamma_1}{\gamma_3}$}"
+           r" & \multicolumn{2}{c}{$\frac{\gamma_1}{\gamma_4}$}\\",
            r"\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(l){9-10}",
            r"$G$ & \# & mean & max & mean & min & mean & min & mean & min\\", r"\midrule"]
     groups = defaultdict(list)
@@ -219,7 +219,7 @@ def local_ascent(data, tables):
     labels = {"gamma_c25": r"c=\frac14", "gamma_c50": r"c=\frac12", "gamma_c75": r"c=\frac34", "gamma1": r"c=1"}
     pct = lambda key, col: f"${np.mean([float(r[col]) for r in groups[key]]):.3f}$"
     out = [r"\begin{table}[H]", r"\centering\small\setlength{\tabcolsep}{5pt}",
-           r"\caption{Local ascent from random starts with the penalties $\frac12+c\sqrt g/2$: fraction of starts that end at a maximum pair, before and after repair."
+           r"\caption{Local ascent from random starts with the penalties $\frac12+\frac c2\sqrt g$: fraction of starts that end at a maximum pair, before and after repair."
            r"}\label{tbl-ascent-below}",
            r"\begin{tabular}{@{}lrrrrrrrrr@{}}", r"\toprule",
            "& & " + " & ".join(rf"\multicolumn{{2}}{{c}}{{${labels[t]}$}}" for t in names) + r"\\",
