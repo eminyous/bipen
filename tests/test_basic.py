@@ -86,3 +86,31 @@ def test_end_state_and_repair():
     assert repair(B, x, y) == 2
     assert end_state(B, 2, np.array([0, 1.0]), y) == "optimal"
     assert end_state(B, 2, np.array([0, 1.0]), np.array([1.0, 0])) == "nonmaximal"
+
+
+def test_dsos_level_0():
+    # Propositions B.3 and B.4: zeta_L^(0) is half the maximum degree of the bipartite complement, and zeta_R^(0) lies
+    # between half the spectral norm of J - U and zeta_L^(0)
+    from bipen.dsos import zeta
+
+    rng = np.random.default_rng(4)
+    for _ in range(5):
+        B = random_bipartite(3, 4, 0.5, rng)
+        d = max((1 - B).sum(0).max(), (1 - B).sum(1).max())
+        dsos, sdsos = zeta(B, 0), zeta(B, 0, scaled=True)
+        assert abs(dsos - d / 2) < 1e-6
+        assert 0.5 * np.linalg.norm(1 - B, 2) - 1e-6 <= sdsos <= dsos + 1e-6
+
+
+def test_dsos_between_polya_and_k1():
+    # Proposition B.2 at level 1
+    from bipen.dsos import zeta as zeta_dsos
+    from bipen.polya import zeta as zeta_polya
+    from bipen.sdp import cop_k1
+
+    rng = np.random.default_rng(5)
+    for _ in range(3):
+        B = random_bipartite(2, 3, 0.5, rng)
+        chain = [zeta_polya(B, 1), zeta_dsos(B, 1), zeta_dsos(B, 1, scaled=True), cop_k1(B),
+                 0.5 * np.sqrt(parameters(B)["g"])]
+        assert all(a >= b - 1e-6 for a, b in zip(chain, chain[1:]))
