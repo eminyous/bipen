@@ -54,7 +54,7 @@ def cells(G):
     return [f"${len(G)}$"] + exact + [f"${fixed(v, d)}$" for v, d in zip(values, DECIMALS)]
 
 
-HEADER = (r"\# & $h_1$ & $\eta_1\left(\cdot;\DNN\right)$ & $\kappa^{\left(1\right)}$ & $h_1$ & $\eta_1\left(\cdot;\DNN\right)$ & $\kappa^{\left(1\right)}$ & $h_1$ & $\eta_1\left(\cdot;\DNN\right)$ & $\kappa^{\left(1\right)}$\\")
+HEADER = (r"\# & $h_1$ & $\hK{\DNN}$ & $\kappa^{\left(1\right)}$ & $h_1$ & $\hK{\DNN}$ & $\kappa^{\left(1\right)}$ & $h_1$ & $\hK{\DNN}$ & $\kappa^{\left(1\right)}$\\")
 GAPS = (r"gap of the bound relative to $\frac12\sqrt g$, in percent, mean and maximum over the graphs of the row")
 BLOCKS = (("balanced, $m_1=m_2$", lambda m, k: m == k), ("unbalanced, $m_1<m_2$", lambda m, k: m < k))
 
@@ -124,7 +124,7 @@ def matchings(data, tables):
            r"\caption{The bounds on the perfect matchings $M_r$, $2\le r\le12$, on which one of them is not exact, that is, for odd $r$; "
            r"there $\frac12\sqrt g=\frac14\sqrt{r^2-1}$, while for even $r$ all bounds equal $\frac r4$.}\label{tbl-matchings}",
            r"\begin{tabular}{@{}rrrrr@{}}", r"\toprule",
-           r"$r$ & $\frac12\sqrt g$ & $h_1$ & $\eta_1\left(\cdot;\DNN\right)$ & $\kappa^{\left(1\right)}$\\", r"\midrule"]
+           r"$r$ & $\frac12\sqrt g$ & $h_1$ & $\hK{\DNN}$ & $\kappa^{\left(1\right)}$\\", r"\midrule"]
     for r in sorted(rows, key=lambda r: int(r["m"])):
         vals = [float(r[k]) for k in ("half_sqrt_g", "h1", "h1_dnn", "k1")]
         if max(vals[1:]) - vals[0] < TOL:
