@@ -1,4 +1,4 @@
-"""The bipen command: run the experiments of the paper and build its tables and figure.
+"""The bipen command: run the experiments of the paper and write the numbers of its tables and figure.
 
 The folders default to data/, tables/ and figures/ of the paper folder that contains this code.
 """
@@ -11,12 +11,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 EXPERIMENTS = {
-    "bounds-table": "h1, h1_dnn and kappa^(1) on the structured graphs and the first random ones (bounds.csv)",
+    "bounds": "h1, h1_dnn and kappa^(1) on the structured graphs and the first random ones (bounds.csv)",
     "random-graphs": "the 3000 random graphs, about 60 CPU hours (random.csv)",
     "k1-check": "the random graphs where kappa^(1) is not exact, at tolerance 1e-10 (k1_check.csv)",
     "lasserre-compare": "kappa^(1) against the Lasserre bound g_2 (lasserre.csv, or lasserre<size>.csv)",
     "local-ascent": "block-coordinate ascent with seven penalties and two kinds of starts (local_ascent.csv)",
-    "partA-threshold": "the smallest valid penalty gamma* (partA_threshold.csv)",
+    "smallest-penalty": "the smallest valid penalty gamma* (smallest_penalty.csv)",
     "smallest-dnn-gap": "small graphs where the DNN bound is not exact (smallest_dnn_gap.txt)",
     "polya-finiteness": "the first finite Polya level against alpha* - 1 (polya_finiteness.csv)",
     "polya-levels": "the Polya bounds by level (polya_levels.csv)",
@@ -47,12 +47,12 @@ def main():
     p.add_argument("--size", type=int, help="lasserre-compare only: a single balanced size")
     p.add_argument("--seeds", type=int, help="lasserre-compare only: graphs per size and probability")
     p.add_argument("--data", type=Path, default=ROOT / "data", help="where the results are written and read")
-    p = sub.add_parser("tables", help="write the LaTeX tables of the paper")
+    p = sub.add_parser("tables", help="write the numbers of the tables of the paper")
     p.add_argument("--data", type=Path, default=ROOT / "data", help="where the results are read")
-    p.add_argument("--tables", type=Path, default=ROOT / "tables", help="where the tables are written")
-    p = sub.add_parser("plots", help="draw the figure of the paper")
+    p.add_argument("--tables", type=Path, default=ROOT / "tables", help="where the table data are written")
+    p = sub.add_parser("plots", help="write the numbers of the figure of the paper")
     p.add_argument("--data", type=Path, default=ROOT / "data", help="where the results are read")
-    p.add_argument("--figures", type=Path, default=ROOT / "figures", help="where the figure is written")
+    p.add_argument("--figures", type=Path, default=ROOT / "figures", help="where the figure data are written")
     args = parser.parse_args()
 
     if args.command == "list":

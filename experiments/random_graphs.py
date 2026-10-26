@@ -1,6 +1,6 @@
-"""The bounds of bounds_table on 100 random graphs for each size and each p in {0.3, 0.5, 0.7}.
+"""The bounds of experiments.bounds on 100 random graphs for each size and each p in {0.3, 0.5, 0.7}.
 
-Balanced sizes use the seeds of bounds_table, 1000 m + 100 int(10 p) + s, so its 180 graphs are the seeds
+Balanced sizes use the seeds of experiments.bounds, 1000 m + 100 int(10 p) + s, so its 180 graphs are the seeds
 s < 10; they are copied from bounds.csv when it exists and has their K^(1) bound. Unbalanced sizes use
 100000 k + 1000 m + 100 int(10 p) + s. Results are appended to random.csv in the data folder, largest graphs first,
 and a rerun skips the graphs already there. The 20+20 graphs need about 10 minutes and 5 GB each, and the
@@ -17,11 +17,11 @@ from multiprocessing import Pool
 import numpy as np
 
 from bipen.graphs import random_bipartite
-from experiments import bounds_table
-from experiments.bounds_table import FIELDS, row
+from experiments import bounds
+from experiments.bounds import FIELDS, row
 
 warnings.filterwarnings("ignore")
-bounds_table.K1_MAX = 40  # bounds_table skips K^(1) above n = 30; here it is computed for 20+20 too
+bounds.K1_MAX = 40  # bounds skips K^(1) above n = 30; here it is computed for 20+20 too
 SIZES = [(6, 6), (8, 8), (10, 10), (12, 12), (15, 15), (20, 20), (5, 10), (8, 16), (10, 20), (6, 24)]
 PS = [0.3, 0.5, 0.7]
 SEEDS = 100

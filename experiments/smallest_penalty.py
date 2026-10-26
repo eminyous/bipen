@@ -2,7 +2,7 @@
 
 Compares d* with the bound (1 + sqrt g)/2 and with (1 + max(|V1|,|V2|))/2, the
 Gillis-Glineur threshold after the change of parameter d_GG = 2d - 1, on 100 random graphs for each size and each p
-(empty and complete graphs are skipped) and on the graphs N_k. Run with: bipen run partA-threshold
+(empty and complete graphs are skipped) and on the graphs N_k. Run with: bipen run smallest-penalty
 """
 
 import csv
@@ -16,7 +16,10 @@ from bipen.graphs import cost_matrix, full_adjacency, random_bipartite
 from bipen.penalty import max_on_nonneg_sphere
 
 
-def threshold(B, tol=1e-7):
+BISECTION_TOL = 1e-7
+
+
+def threshold(B, tol=BISECTION_TOL):
     """Return (d*, g) with d* the smallest d giving the value sqrt(g)/2 (bisection)."""
     m, k = B.shape
     C, A = cost_matrix(m, k), full_adjacency(B)
@@ -63,7 +66,7 @@ def main(data, workers=6):
         d, g = threshold(B)
         rows.append({"family": "near-biclique", "m": a + 1, "k": a, "p": "", "seed": "", "edges": 1, "g": g, "d_star": d,
                      "bound_sqrt_g": (1 + np.sqrt(g)) / 2, "bound_gg": (1 + a + 1) / 2})
-    out = os.path.join(data, "partA_threshold.csv")
+    out = os.path.join(data, "smallest_penalty.csv")
     with open(out, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=rows[0].keys())
         w.writeheader()

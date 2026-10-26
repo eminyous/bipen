@@ -1,5 +1,5 @@
 """kappa^(1) against the Lasserre bound sqrt(g_2)/2 of LPV, values and times, on the first ten random graphs of
-each balanced size up to 15+15 and each p (the graphs of bounds_table). Writes lasserre.csv in the data folder; with
+each balanced size up to 15+15 and each p (the graphs of experiments.bounds). Writes lasserre.csv in the data folder; with
 a size and a number of seeds, it runs that size only and writes lasserre<size>.csv.
 
 Run with: bipen run lasserre-compare --workers N [--size 20 --seeds 3]
