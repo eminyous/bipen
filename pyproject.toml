@@ -8,7 +8,6 @@ dependencies = [
     "cvxpy",
     "clarabel",
     "scs",
-    "matplotlib",
     "sympy>=1.14.0",
     "mosek==11.2.6",
 ]

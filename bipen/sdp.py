@@ -21,12 +21,13 @@ from bipen.graphs import cost_matrix, edges, full_adjacency
 # optimal, so they are tightened; TOL = None keeps Clarabel's defaults.
 SOLVER = cp.CLARABEL if os.environ.get("BIPEN_SOLVER") == "clarabel" else cp.MOSEK
 TOL = None
+MOSEK_TOL = 1e-10
 
 
 def solver_opts(tol):
     if SOLVER == cp.CLARABEL:
         return {} if tol is None else {"tol_gap_abs": tol, "tol_gap_rel": tol, "tol_feas": tol}
-    tol = tol or 1e-10
+    tol = tol or MOSEK_TOL
     params = {"MSK_DPAR_INTPNT_CO_TOL_REL_GAP": tol, "MSK_DPAR_INTPNT_CO_TOL_PFEAS": tol,
               "MSK_DPAR_INTPNT_CO_TOL_DFEAS": tol, "MSK_DPAR_INTPNT_TOL_REL_GAP": tol,
               "MSK_DPAR_INTPNT_TOL_PFEAS": tol, "MSK_DPAR_INTPNT_TOL_DFEAS": tol, "MSK_IPAR_NUM_THREADS": 2}
