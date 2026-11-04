@@ -1,7 +1,7 @@
 """MOSEK against Clarabel on h_1, h_1^D and rho^(1): time, memory and accuracy.
 
 MOSEK at tolerance 1e-10, and Clarabel with its default tolerances and at 1e-10, for one random graph per balanced
-size of Table 1 and the three largest rho^(1) gaps of bounds/inexact.
+size of bounds/sampled and the three largest rho^(1) gaps of bounds/inexact.
 Each solve runs in its own process, so that its peak memory can be read.
 Run with: bipen run bounds/solvers --workers N
 """

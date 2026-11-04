@@ -1,10 +1,9 @@
-"""An exact check of the certificates of Appendix A (Proposition 3.5 for n = 5).
-
-The proof shows h_1^D(G) = sqrt(g)/2 for every bipartite graph on five vertices.
+"""An exact check of the certificates that prove h_1^D = sqrt(g)/2 on five vertices.
 
 Enumerates the graphs with sides 1+4 and 2+3 up to isomorphism, deletes full vertices, and checks that each graph
-then has at most four vertices, or has no edge, or is one of the graphs G_1, ..., G_4 of Table A.1. For those four,
-the certificate S = lambda I - C + Y - Z of the table is checked to be positive semidefinite in exact arithmetic.
+then has at most four vertices, or has no edge, or is one of the graphs G_1, ..., G_4 of the paper's table of
+certificates. For those four, the certificate S = lambda I - C + Y - Z of the table is checked to be positive
+semidefinite in exact arithmetic.
 Prints only.
 Run with: bipen run bounds/certificates
 """
@@ -17,8 +16,8 @@ import sympy
 from bipen.exact import biclique_number
 
 HALF = sympy.Rational(1, 2)
-# Table A.1, with the vertices 0, 1 = v11, v12 (V1) and 2, 3, 4 = v21, v22, v23 (V2): the edges, g, the value w of Y
-# on every edge, and the nonzero entries of Z above the diagonal
+# The table of certificates, with the vertices 0, 1 = v11, v12 (V1) and 2, 3, 4 = v21, v22, v23 (V2): the edges, g,
+# the value w of Y on every edge, and the nonzero entries of Z above the diagonal
 CERTIFICATES = {
     "G1": {"edges": [(1, 4)], "g": 4, "w": sympy.Integer(1), "Z": {}},
     "G2": {"edges": [(1, 3), (1, 4)], "g": 3, "w": sympy.Rational(3, 4), "Z": {}},
@@ -39,7 +38,8 @@ def canonical_form(U):
 
 
 def delete_full_vertices(U):
-    """Delete full vertices one at a time, as long as their side keeps another vertex (Lemma A.1)."""
+    """Delete full vertices one at a time, as long as their side keeps another vertex; this changes neither g nor
+    h_1^D."""
     while True:
         m1, m2 = U.shape
         full_in_V1 = [i for i in range(m1) if m1 > 1 and U[i].all()]

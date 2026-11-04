@@ -1,8 +1,8 @@
-"""rho^(1) solved again at tolerance 1e-10 where it is not exact (Section 6).
+"""rho^(1) solved again at tolerance 1e-10 where it is not exact.
 
-On every random graph of Table 1 where rho^(1) is not exact, with the primal and dual objectives and residuals, to
-check that the gaps are not numerical artefacts. The dual objective is a lower bound on rho^(1) up to the dual
-residual.
+On every random graph of bounds/sampled where rho^(1) is not exact, with the primal and dual objectives and
+residuals, to check that the gaps are not numerical artefacts. The dual objective is a lower bound on rho^(1) up to
+the dual residual.
 Run with: bipen run bounds/inexact --workers N
 """
 

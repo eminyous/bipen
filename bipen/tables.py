@@ -53,7 +53,7 @@ def exact_mean(values):
 
 
 def random_graphs(data):
-    """The random graphs of Table 1 from every results file, one row per graph."""
+    """The random graphs of the bounds, from every results file, one row per graph."""
     rows = {}
     for name in (File.BOUNDS_STRUCTURED, File.BOUNDS_UNBALANCED, File.BOUNDS_SAMPLED):
         if (data / name).exists():
@@ -87,7 +87,7 @@ def gaps(graphs):
 
 
 def bounds_table(data, tables):
-    """Table 1 and Table C.1: the bounds on the random graphs, one row per size, then one per size and p."""
+    """The bounds on the random graphs, one row per size, then one per size and p."""
     sizes = by_size(data)
     rows = [{"block": block, "size": f"{m1}+{m2}", "p": "all", **gaps(graphs)} for block, m1, m2, graphs in sizes]
     rows += [
@@ -104,7 +104,7 @@ def bounds_table(data, tables):
 
 
 def matchings_table(data, tables):
-    """Table 2: the bounds on the perfect matchings sK_2."""
+    """The bounds on the perfect matchings sK_2."""
     rows = sorted(
         (row for row in read_csv(data / File.BOUNDS_STRUCTURED) if row[Column.FAMILY] == Family.MATCHING),
         key=lambda row: int(row[Column.M1]),
@@ -131,7 +131,7 @@ def penalty_row_graph(row):
 
 
 def thresholds_table(data, tables):
-    """Table 3: the smallest valid penalty gamma* against gamma_1 = (1 + sqrt g)/2, and gamma_1 against gamma_2 and
+    """The smallest valid penalty gamma* against gamma_1 = (1 + sqrt g)/2, and gamma_1 against gamma_2 and
     gamma_3 of Gillis and Glineur and the spectral threshold gamma_4, as ratios computed graph by graph: the mean and
     the maximum or minimum over the random graphs of each size, and the value on each N_k."""
     gamma_star = lambda row: float(row[Column.GAMMA_STAR])
@@ -165,7 +165,7 @@ def thresholds_table(data, tables):
 
 
 def ascent_table(data, tables):
-    """Table 4 and Table C.2: for each kind of start, size, p and penalty, the mean fraction of starts from which the
+    """The local ascent: for each kind of start, size, p and penalty, the mean fraction of starts from which the
     ascent ends at a maximum pair, without and with repair, and the number of graphs where some start does."""
     groups = defaultdict(list)
     for row in read_csv(data / File.PENALTY_ASCENT):
@@ -183,7 +183,7 @@ def ascent_table(data, tables):
 
 
 def dsos_table(data, tables):
-    """Table B.1: the DSOS bounds by level, one row per graph."""
+    """The DSOS bounds by level, one row per graph."""
     graphs = defaultdict(dict)
     for row in read_csv(data / File.POLYA_DSOS):
         graphs[row[Column.GRAPH]].update(
@@ -194,9 +194,6 @@ def dsos_table(data, tables):
             }
         )
     write(tables / "dsos.csv", list(graphs.values()))
-
-
-# The numbers quoted in the text of the paper, by section, for values.csv
 
 
 def random_graph_values(data):

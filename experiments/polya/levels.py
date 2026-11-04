@@ -1,4 +1,4 @@
-"""The Pólya bounds zeta^(r) by level on the graphs of Figure 1.
+"""The Pólya bounds zeta^(r) by level on four small graphs, for the Pólya figure.
 
 Levels 0 <= r <= 7, on the graph of LPV, Example 1, on 3K_2 and 4K_2, and on the crown on 4 + 4 vertices.
 Run with: bipen run polya/levels

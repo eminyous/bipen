@@ -1,4 +1,4 @@
-"""h_1, h_1^D and rho^(1) on the random graphs of Table 1.
+"""h_1, h_1^D and rho^(1) on 100 random graphs per size and edge probability.
 
 100 graphs for each size and each p in {0.3, 0.5, 0.7}, with rho^(1) also on 20+20.
 The 180 random graphs of bounds/structured are the first ten of each balanced size and p; they are copied from there

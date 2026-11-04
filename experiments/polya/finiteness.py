@@ -1,4 +1,4 @@
-"""The first level at which the Pólya bound is finite, against alpha* - 1 (Theorem 5.2).
+"""The first level at which the Pólya bound is finite; the paper proves it is alpha* - 1.
 
 Graphs: 15 random graphs for each size 2+2, 2+3, 3+3 and 3+4, with an edge probability drawn in [0.2, 0.8], without
 the complete ones.

@@ -1,4 +1,4 @@
-"""A search for small graphs on which h_1^D is not exact (Propositions 3.4 and 3.5).
+"""A search for small graphs on which h_1^D is not exact.
 
 Every graph of the sizes 2+3 to 2+5, then 400 random graphs for each size 4+4 to 6+6, with an edge probability drawn
 in [0.2, 0.8]. Writes one line per graph found.

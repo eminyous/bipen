@@ -1,8 +1,8 @@
-"""The local ascent with seven penalties and two kinds of starts (Table 4 and Table C.2).
+"""The local ascent with seven penalties and two kinds of starts.
 
 Block-coordinate ascent on max y^T H_gamma z over nonnegative unit vectors, with H_gamma = J - 2 gamma U.
 
-Graphs: the first 20 random graphs of Table 1 of the sizes 10+10, 15+15 and 20+20 and each p in {0.3, 0.5, 0.7}.
+Graphs: the first 20 random graphs of bounds/sampled of the sizes 10+10, 15+15 and 20+20 and each p in {0.3, 0.5, 0.7}.
 Penalties: gamma_1 = (1 + sqrt g)/2, which rounding rho^(1) (read from bounds/sampled) gives on every graph;
 gamma_2 = (1 + max(m1, m2))/2; gamma_3 = (1 + sqrt |E(G^)|)/2, with G^ the bipartite complement;
 gamma_4 = (1 + |J - U|_2)/2; and 1/2 + c sqrt(g)/2 below gamma_1, for c = 1/4, 1/2 and 3/4.

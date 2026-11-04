@@ -1,7 +1,6 @@
-"""The penalty formulation: its exact value and smallest valid penalty for small graphs, and the local ascent of
-Section 6.
+"""The penalty formulation: its exact value and smallest valid penalty for small graphs, and the local ascent.
 
-The exact value is mu = max { u^T Q u : u >= 0, |u| = 1 } for Q = C - gamma W, as in Appendix C. Every maximizer u is
+The exact value is mu = max { u^T Q u : u >= 0, |u| = 1 } for Q = C - gamma W. Every maximizer u is
 a positive eigenvector of Q_S on its support S, for the eigenvalue mu = lambda_max(Q_S); conversely, a positive
 eigenvector of a principal submatrix Q_S is feasible, with its eigenvalue as value. Hence mu is the largest
 eigenvalue, over the supports S, of some Q_S whose eigenspace contains a positive vector, which an LP decides exactly,
@@ -113,8 +112,8 @@ BISECTION_TOL = 1e-7
 
 
 def smallest_penalty(U, tol=BISECTION_TOL):
-    """gamma*(G), the smallest gamma with max { u^T (C - gamma W) u : u >= 0, |u| = 1 } = sqrt(g)/2, by bisection
-    (Section 6), returned as the upper end of the final interval."""
+    """gamma*(G), the smallest gamma with max { u^T (C - gamma W) u : u >= 0, |u| = 1 } = sqrt(g)/2, by bisection,
+    returned as the upper end of the final interval."""
     m1, m2 = U.shape
     C, W = cost_matrix(m1, m2), adjacency(U)
     target = 0.5 * np.sqrt(biclique_number(U))

@@ -10,7 +10,7 @@ class File:
     BOUNDS_STRUCTURED = "bounds/structured.csv"
     BOUNDS_SAMPLED = "bounds/sampled.csv"
     # an earlier run on the unbalanced sizes, superseded by BOUNDS_SAMPLED; still read before it, as it fixes the
-    # order in which Table 1 sums its graphs, and so the last digits of its means
+    # order in which the table of the bounds sums its graphs, and so the last digits of its means
     BOUNDS_UNBALANCED = "bounds/unbalanced.csv"
     BOUNDS_INEXACT = "bounds/inexact.csv"
     BOUNDS_LASSERRE = "bounds/lasserre.csv"
@@ -93,7 +93,7 @@ class Family:
 
 
 class Graph:
-    """The values of the column graph (Figure 1 and Table B.1)."""
+    """The values of the column graph: the graphs of the Pólya and DSOS bounds."""
 
     LPV_EXAMPLE = "lpv-example-1"
     MATCHING_3 = "matching-3"

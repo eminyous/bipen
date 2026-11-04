@@ -1,4 +1,4 @@
-"""The Pólya bounds of Section 5: the copositive dual with the Pólya cone P^(r) of Bomze and de Klerk,
+"""The Pólya bounds: the copositive dual with the Pólya cone P^(r) of Bomze and de Klerk,
 
     zeta^(r)(G) = min { lambda : lambda I - C + Y in P^(r) },
 

@@ -1,6 +1,6 @@
-"""The DSOS bounds zeta~^(r) by level (Table B.1).
+"""The DSOS bounds zeta~^(r) by level.
 
-Levels 0 <= r <= 2, on the graphs of Figure 1 and on N_2.
+Levels 0 <= r <= 2, on the graphs of polya/levels and on N_2.
 Run with: bipen run polya/dsos
 """
 

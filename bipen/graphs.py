@@ -13,7 +13,7 @@ def random_bipartite(m1, m2, p, rng):
 
 
 def matching(s):
-    """The perfect matching sK_2 on s + s vertices (Proposition 3.4)."""
+    """The perfect matching sK_2 on s + s vertices."""
     return np.eye(s)
 
 
@@ -23,7 +23,7 @@ def crown(s):
 
 
 def near_biclique(k):
-    """The graph N_k of Proposition 4.4: V1 = {v10, ..., v1k}, V2 = {v21, ..., v2k} and the single edge v10 v21."""
+    """The graph N_k: V1 = {v10, ..., v1k}, V2 = {v21, ..., v2k} and the single edge v10 v21."""
     U = np.zeros((k + 1, k))
     U[0, 0] = 1
     return U
@@ -62,12 +62,12 @@ def penalty_matrix(U, gamma):
 
 
 def bounds_graph(m1, m2, p, s):
-    """The random graphs of Table 1, with the seed 1000 m1 + 100 int(10 p) + s for balanced sizes and
+    """The random graphs of the bounds, with the seed 1000 m1 + 100 int(10 p) + s for balanced sizes and
     100000 m2 + 1000 m1 + 100 int(10 p) + s otherwise."""
     base = 1000 * m1 if m1 == m2 else 100000 * m2 + 1000 * m1
     return random_bipartite(m1, m2, p, np.random.default_rng(base + 100 * int(10 * p) + s))
 
 
 def penalty_graph(m1, m2, p, s):
-    """The random graphs of Table 3, with the seed 100000 m2 + 1000 m1 + 100 int(10 p) + s."""
+    """The random graphs of the smallest penalty, with the seed 100000 m2 + 1000 m1 + 100 int(10 p) + s."""
     return random_bipartite(m1, m2, p, np.random.default_rng(100000 * m2 + 1000 * m1 + 100 * int(10 * p) + s))

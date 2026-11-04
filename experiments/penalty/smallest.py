@@ -1,4 +1,4 @@
-"""The smallest valid penalty gamma* against the thresholds (Table 3).
+"""The smallest valid penalty gamma* against the thresholds.
 
 With the thresholds gamma_1 = (1 + sqrt g)/2 and gamma_2 = (1 + max(m1, m2))/2, the threshold of Gillis and
 Glineur after the change of parameter 2 gamma - 1.

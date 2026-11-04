@@ -18,7 +18,8 @@ CURVES = {
 
 
 def polya_figure(data, figures):
-    """Figure 1: zeta^(r) / (sqrt(g)/2) by level r, one column per graph, nan where the program is infeasible."""
+    """The Pólya figure: zeta^(r) / (sqrt(g)/2) by level r, one column per graph, nan where the program is
+    infeasible."""
     ratios = defaultdict(dict)
     for row in read_csv(data / File.POLYA_LEVELS):
         ratio = float(row[Column.ZETA]) / float(row[Column.HALF_SQRT_G])

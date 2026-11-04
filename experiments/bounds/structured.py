@@ -1,4 +1,4 @@
-"""h_1, h_1^D and rho^(1) on the structured graphs and the first random graphs (Table 2).
+"""h_1, h_1^D and rho^(1) on the structured graphs and the first random graphs.
 
 Also g, h and sqrt(g)/2. Graphs: the graph of LPV, Example 1; the matchings sK_2, 2 <= s <= 12; the crowns,
 5 <= s <= 12; and ten random graphs for each balanced size 6+6 to 20+20 and each p in {0.3, 0.5, 0.7}. rho^(1) is

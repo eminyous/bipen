@@ -83,7 +83,7 @@ def test_end_state_and_repair():
 
 
 def test_dsos_and_sdsos_at_level_0():
-    # Propositions B.3 and B.4: zeta~^(0) is half the maximum degree of the bipartite complement, and rho~^(0) lies
+    # at level 0, zeta~^(0) is half the maximum degree of the bipartite complement, and rho~^(0) lies
     # between half the spectral norm of J - U and zeta~^(0)
     rng = np.random.default_rng(4)
     for _ in range(5):
@@ -95,7 +95,7 @@ def test_dsos_and_sdsos_at_level_0():
 
 
 def test_dsos_and_sdsos_between_polya_and_parrilo():
-    # Proposition B.2 at level 1
+    # zeta^(1) >= zeta~^(1) >= rho~^(1) >= rho^(1) >= sqrt(g)/2
     rng = np.random.default_rng(5)
     for _ in range(3):
         U = random_bipartite(2, 3, 0.5, rng)

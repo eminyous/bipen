@@ -1,4 +1,4 @@
-"""The DSOS and SDSOS bounds of Appendix B: the copositive dual with the cones of Ahmadi and Majumdar,
+"""The DSOS and SDSOS bounds: the copositive dual with the cones of Ahmadi and Majumdar,
 
     zeta~^(r)(G) = min { lambda : lambda I - C + Y in P~^(r) }   (DSOS),
     rho~^(r)(G)  = min { lambda : lambda I - C + Y in R~^(r) }   (SDSOS),
