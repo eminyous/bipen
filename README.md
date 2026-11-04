@@ -7,7 +7,7 @@ uv sync
 source .venv/bin/activate
 pytest
 bipen list
-bipen run bounds/random --workers 12
+bipen run bounds/sampled --workers 12
 bipen tables
 bipen plots
 ```

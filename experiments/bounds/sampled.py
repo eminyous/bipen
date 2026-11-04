@@ -4,7 +4,7 @@
 The 180 random graphs of bounds/structured are the first ten of each balanced size and p; they are copied from there
 when it exists. The results are appended, largest graphs first, and a rerun skips the graphs already there. The 20+20
 graphs need about 10 minutes and 5 GB each, and the whole run about 60 CPU hours.
-Run with: bipen run bounds/random --workers N
+Run with: bipen run bounds/sampled --workers N
 """
 
 import warnings

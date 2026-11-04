@@ -5,7 +5,7 @@ the numbers of the paper.
 
 NAMES = [
     "bounds/structured",
-    "bounds/random",
+    "bounds/sampled",
     "bounds/inexact",
     "bounds/lasserre",
     "bounds/solvers",
