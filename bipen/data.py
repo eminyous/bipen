@@ -9,8 +9,7 @@ import csv
 class File:
     BOUNDS_STRUCTURED = "bounds/structured.csv"
     BOUNDS_SAMPLED = "bounds/sampled.csv"
-    # an earlier run on the unbalanced sizes, superseded by BOUNDS_SAMPLED; still read before it, as it fixes the
-    # order in which the table of the bounds sums its graphs, and so the last digits of its means
+    # read before BOUNDS_SAMPLED, which overrides its rows; it sets the order in which the bounds table sums them
     BOUNDS_UNBALANCED = "bounds/unbalanced.csv"
     BOUNDS_INEXACT = "bounds/inexact.csv"
     BOUNDS_LASSERRE = "bounds/lasserre.csv"
