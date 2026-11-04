@@ -1,75 +1,56 @@
-"""Smallest penalty d* with max{u^T (C - d A_G) u : u >= 0, |u| = 1} = sqrt(g)/2.
+"""The smallest valid penalty gamma* against the thresholds (Table 3).
 
-Compares d* with the bound (1 + sqrt g)/2 and with (1 + max(|V1|,|V2|))/2, the
-Gillis-Glineur threshold after the change of parameter d_GG = 2d - 1, on 100 random graphs for each size and each p
-(empty and complete graphs are skipped) and on the graphs N_k. Run with: bipen run smallest-penalty
+With the thresholds gamma_1 = (1 + sqrt g)/2 and gamma_2 = (1 + max(m1, m2))/2, the threshold of Gillis and
+Glineur after the change of parameter 2 gamma - 1.
+
+Graphs: 100 random graphs for each size 2+3 to 5+5 and each p in {0.2, 0.4, 0.6, 0.8}, without the empty and the
+complete ones, and the graphs N_k, 2 <= k <= 5.
+Run with: bipen run smallest-penalty --workers N
 """
 
-import csv
-import os
 from multiprocessing import Pool
 
 import numpy as np
 
-from bipen.brute import parameters
-from bipen.graphs import cost_matrix, full_adjacency, random_bipartite
-from bipen.penalty import max_on_nonneg_sphere
-
-
-BISECTION_TOL = 1e-7
-
-
-def threshold(B, tol=BISECTION_TOL):
-    """Return (d*, g) with d* the smallest d giving the value sqrt(g)/2 (bisection)."""
-    m, k = B.shape
-    C, A = cost_matrix(m, k), full_adjacency(B)
-    g = parameters(B)["g"]
-    target = 0.5 * np.sqrt(g)
-    ok = lambda d: max_on_nonneg_sphere(C - d * A) <= target + 1e-9
-    lo, hi = 0.0, 1.0
-    while not ok(hi):
-        lo, hi = hi, 2 * hi
-    while hi - lo > tol:
-        mid = (lo + hi) / 2
-        lo, hi = (lo, mid) if ok(mid) else (mid, hi)
-    return hi, g
-
-
-def near_biclique(a):
-    """V1 = A + {i}, V2 = B, |A| = |B| = a, the only edge joins i to one vertex of B."""
-    B = np.zeros((a + 1, a))
-    B[a, 0] = 1
-    return B
-
+from bipen.data import Column, Family, File, write_csv
+from bipen.exact import biclique_number
+from bipen.graphs import near_biclique, penalty_graph
+from bipen.penalty import smallest_penalty
 
 SIZES = [(2, 3), (3, 3), (3, 4), (4, 4), (4, 5), (5, 5)]
 PS = [0.2, 0.4, 0.6, 0.8]
-SEEDS = 100
+GRAPHS = 100
 
 
-def job(args):
-    m, k, p, s = args
-    B = random_bipartite(m, k, p, np.random.default_rng(100000 * k + 1000 * m + 100 * int(10 * p) + s))
-    if B.sum() == 0 or B.sum() == m * k:
+def penalty_row(family, U, p="", s=""):
+    m1, m2 = U.shape
+    g = biclique_number(U)
+    return {
+        Column.FAMILY: family,
+        Column.M1: m1,
+        Column.M2: m2,
+        Column.P: p,
+        Column.SEED: s,
+        Column.EDGES: int(U.sum()),
+        Column.G: g,
+        Column.GAMMA_STAR: smallest_penalty(U),
+        Column.GAMMA1: (1 + np.sqrt(g)) / 2,
+        Column.GAMMA2: (1 + max(m1, m2)) / 2,
+    }
+
+
+def job(graph):
+    m1, m2, p, s = graph
+    U = penalty_graph(m1, m2, p, s)
+    if U.sum() in (0, m1 * m2):
         return None
-    d, g = threshold(B)
-    return {"family": "random", "m": m, "k": k, "p": p, "seed": s, "edges": int(B.sum()), "g": g, "d_star": d,
-            "bound_sqrt_g": (1 + np.sqrt(g)) / 2, "bound_gg": (1 + max(m, k)) / 2}
+    return penalty_row(Family.RANDOM, U, p, s)
 
 
 def main(data, workers=6):
-    todo = [(m, k, p, s) for m, k in SIZES for p in PS for s in range(SEEDS)]
+    todo = [(m1, m2, p, s) for m1, m2 in SIZES for p in PS for s in range(GRAPHS)]
     with Pool(workers) as pool:
-        rows = [r for r in pool.map(job, todo, chunksize=8) if r is not None]
-    for a in range(2, 6):
-        B = near_biclique(a)
-        d, g = threshold(B)
-        rows.append({"family": "near-biclique", "m": a + 1, "k": a, "p": "", "seed": "", "edges": 1, "g": g, "d_star": d,
-                     "bound_sqrt_g": (1 + np.sqrt(g)) / 2, "bound_gg": (1 + a + 1) / 2})
-    out = os.path.join(data, "smallest_penalty.csv")
-    with open(out, "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=rows[0].keys())
-        w.writeheader()
-        w.writerows(rows)
-    print(len(rows), "rows written to", out)
-
+        rows = [row for row in pool.map(job, todo, chunksize=8) if row is not None]
+    rows += [penalty_row(Family.NEAR_BICLIQUE, near_biclique(k)) for k in range(2, 6)]
+    write_csv(data / File.SMALLEST_PENALTY, rows)
+    print(len(rows), "rows written")
