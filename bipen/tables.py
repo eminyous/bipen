@@ -45,14 +45,14 @@ def is_exact(row, column):
     return float(row[column]) - half_sqrt_g(row) < TOL
 
 
-def exact_mean(values):
+def mean(fractions):
     """The exact mean of fractions of runs (k/100 or k/(2m)), to twelve decimals, so that the paper's rounding half up
     does not depend on the order of the rows."""
-    q = sum(Fraction(v).limit_denominator(1000) for v in values) / len(values)
+    q = sum(Fraction(f).limit_denominator(1000) for f in fractions) / len(fractions)
     return (Decimal(q.numerator) / Decimal(q.denominator)).quantize(Decimal("1e-12")).normalize()
 
 
-def random_graphs(data):
+def sampled(data):
     """The random graphs of the bounds, from every results file, one row per graph."""
     rows = {}
     for name in (File.BOUNDS_STRUCTURED, File.BOUNDS_UNBALANCED, File.BOUNDS_SAMPLED):
@@ -63,10 +63,10 @@ def random_graphs(data):
     return list(rows.values())
 
 
-def by_size(data):
+def sizes(data):
     """The random graphs by size, balanced sizes first, each block ordered by shape and then by size."""
     groups = defaultdict(list)
-    for row in random_graphs(data):
+    for row in sampled(data):
         groups[(int(row[Column.M1]), int(row[Column.M2]))].append(row)
     order = sorted(groups, key=lambda size: (size[0] < size[1], size[1] // size[0], size[0] + size[1]))
     return [("balanced" if m1 == m2 else "unbalanced", m1, m2, groups[(m1, m2)]) for m1, m2 in order]
@@ -86,10 +86,10 @@ def gaps(graphs):
     return out
 
 
-def bounds_table(data, tables):
+def bounds(data, tables):
     """The bounds on the random graphs, one row per size, then one per size and p."""
-    sizes = by_size(data)
-    rows = [{"block": block, "size": f"{m1}+{m2}", "p": "all", **gaps(graphs)} for block, m1, m2, graphs in sizes]
+    groups = sizes(data)
+    rows = [{"block": block, "size": f"{m1}+{m2}", "p": "all", **gaps(graphs)} for block, m1, m2, graphs in groups]
     rows += [
         {
             "block": block,
@@ -97,13 +97,13 @@ def bounds_table(data, tables):
             "p": f"{p:g}",
             **gaps([row for row in graphs if float(row[Column.P]) == p]),
         }
-        for block, m1, m2, graphs in sizes
+        for block, m1, m2, graphs in groups
         for p in sorted({float(row[Column.P]) for row in graphs})
     ]
     write(tables / "bounds.csv", rows)
 
 
-def matchings_table(data, tables):
+def matchings(data, tables):
     """The bounds on the perfect matchings sK_2."""
     rows = sorted(
         (row for row in read_csv(data / File.BOUNDS_STRUCTURED) if row[Column.FAMILY] == Family.MATCHING),
@@ -122,7 +122,7 @@ def matchings_table(data, tables):
     )
 
 
-def penalty_row_graph(row):
+def graph(row):
     """The graph of a row of the smallest penalty: a random graph, or N_k."""
     m1, m2 = int(row[Column.M1]), int(row[Column.M2])
     if row[Column.FAMILY] == Family.RANDOM:
@@ -130,7 +130,7 @@ def penalty_row_graph(row):
     return near_biclique(m2)
 
 
-def thresholds_table(data, tables):
+def thresholds(data, tables):
     """The smallest valid penalty gamma* against gamma_1 = (1 + sqrt g)/2, and gamma_1 against gamma_2 and
     gamma_3 of Gillis and Glineur and the spectral threshold gamma_4, as ratios computed graph by graph: the mean and
     the maximum or minimum over the random graphs of each size, and the value on each N_k."""
@@ -139,7 +139,7 @@ def thresholds_table(data, tables):
     gamma2 = lambda row: float(row[Column.GAMMA2])
     # Gillis and Glineur, Lemma 3: 2 gamma - 1 >= the square root of the number of edges of the bipartite complement
     gamma3 = lambda row: (1 + np.sqrt(int(row[Column.M1]) * int(row[Column.M2]) - int(row[Column.EDGES]))) / 2
-    gamma4 = lambda row: (1 + np.linalg.norm(1 - penalty_row_graph(row), 2)) / 2
+    gamma4 = lambda row: (1 + np.linalg.norm(1 - graph(row), 2)) / 2
     rows = read_csv(data / File.PENALTY_SMALLEST)
     groups = defaultdict(list)
     for row in rows:
@@ -164,7 +164,7 @@ def thresholds_table(data, tables):
     write(tables / "thresholds.csv", out)
 
 
-def ascent_table(data, tables):
+def ascent(data, tables):
     """The local ascent: for each kind of start, size, p and penalty, the mean fraction of starts from which the
     ascent ends at a maximum pair, without and with repair, and the number of graphs where some start does."""
     groups = defaultdict(list)
@@ -175,14 +175,14 @@ def ascent_table(data, tables):
         row = {"starts": starts, "size": f"{m}+{m}", "p": f"{p:g}"}
         for penalty, name in PENALTIES.items():
             runs = [r for r in groups[(starts, m, p)] if r[Column.PENALTY] == penalty]
-            row[name + "success"] = exact_mean([r[Column.SUCCESS] for r in runs])
-            row[name + "repaired"] = exact_mean([r[Column.REPAIRED] for r in runs])
+            row[name + "success"] = mean([r[Column.SUCCESS] for r in runs])
+            row[name + "repaired"] = mean([r[Column.REPAIRED] for r in runs])
             row[name + "graphs"] = sum(float(r[Column.SUCCESS]) > 0 for r in runs)
         out.append(row)
     write(tables / "ascent.csv", out)
 
 
-def dsos_table(data, tables):
+def dsos(data, tables):
     """The DSOS bounds by level, one row per graph."""
     graphs = defaultdict(dict)
     for row in read_csv(data / File.POLYA_DSOS):
@@ -196,8 +196,8 @@ def dsos_table(data, tables):
     write(tables / "dsos.csv", list(graphs.values()))
 
 
-def random_graph_values(data):
-    graphs = random_graphs(data)
+def sampled_bounds(data):
+    graphs = sampled(data)
     gap = [float(row[Column.RHO1]) - half_sqrt_g(row) for row in graphs]
     v = {"graphs": len(graphs)}
     v["rhooneexact"] = sum(is_exact(row, Column.RHO1) for row in graphs)
@@ -212,7 +212,7 @@ def random_graph_values(data):
     return v
 
 
-def lasserre_values(data):
+def lasserre_bounds(data):
     graphs = read_csv(data / File.BOUNDS_LASSERRE)
     v = {"lasserregraphs": len(graphs), "lasserrerhooneexact": sum(is_exact(row, Column.RHO1) for row in graphs)}
     # the one 20+20 graph on which neither rho^(1) nor the Lasserre bound is exact
@@ -227,13 +227,13 @@ def lasserre_values(data):
     return v
 
 
-def polya_values(data):
+def polya_levels(data):
     levels = [row for row in read_csv(data / File.POLYA_LEVELS) if row[Column.GRAPH] == Graph.MATCHING_3]
     top = max(levels, key=lambda row: int(row[Column.LEVEL]))
     return {"polyalevel": int(top[Column.LEVEL]), "polyaratio": float(top[Column.ZETA]) / half_sqrt_g(top)}
 
 
-def penalty_values(data):
+def smallest_penalty(data):
     graphs = [row for row in read_csv(data / File.PENALTY_SMALLEST) if row[Column.FAMILY] == Family.RANDOM]
     return {
         "penaltygraphs": len(graphs),
@@ -241,12 +241,12 @@ def penalty_values(data):
     }
 
 
-def ascent_values(data):
+def local_ascent(data):
     runs = read_csv(data / File.PENALTY_ASCENT)
     groups = defaultdict(list)
     for row in runs:
         groups[(row[Column.STARTS], int(row[Column.M1]), float(row[Column.P]), row[Column.PENALTY])].append(row)
-    percent = lambda group, column: 100 * float(exact_mean([row[column] for row in group]))
+    percent = lambda group, column: 100 * float(mean([row[column] for row in group]))
     select = lambda kind, keep: [group for (starts, m, p, t), group in groups.items() if starts == kind and keep(p, t)]
     starts_per_graph = lambda row: 100 if row[Column.STARTS] == Starts.RANDOM else 2 * int(row[Column.M1])
     valid = lambda p, t: t in Penalty.VALID
@@ -284,7 +284,7 @@ def ascent_values(data):
     return v
 
 
-def rho_gap_values(data):
+def inexact_bounds(data):
     return {
         "dualgap": max(
             abs(float(row[Column.PRIMAL]) - float(row[Column.DUAL])) for row in read_csv(data / File.BOUNDS_INEXACT)
@@ -292,19 +292,26 @@ def rho_gap_values(data):
     }
 
 
-def values_table(data, tables):
+def values(data, tables):
     """The numbers quoted in the text, one per row: the tolerances of the code, then counts and extremes."""
     v = {"exacttol": TOL, "roundoffset": ROUND, "solvertol": MOSEK_TOL, "bisectiontol": BISECTION_TOL}
-    for section in (random_graph_values, lasserre_values, polya_values, penalty_values, ascent_values, rho_gap_values):
-        v.update(section(data))
+    for numbers in (
+        sampled_bounds,
+        lasserre_bounds,
+        polya_levels,
+        smallest_penalty,
+        local_ascent,
+        inexact_bounds,
+    ):
+        v.update(numbers(data))
     write(tables / "values.csv", [{"name": name, "value": x} for name, x in v.items()])
 
 
 def build(data, tables):
     tables.mkdir(parents=True, exist_ok=True)
-    bounds_table(data, tables)
-    matchings_table(data, tables)
-    thresholds_table(data, tables)
-    ascent_table(data, tables)
-    dsos_table(data, tables)
-    values_table(data, tables)
+    bounds(data, tables)
+    matchings(data, tables)
+    thresholds(data, tables)
+    ascent(data, tables)
+    dsos(data, tables)
+    values(data, tables)
