@@ -8,8 +8,8 @@ jobs:
     env:
       BIPEN_SOLVER: clarabel
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
       - run: uv sync --locked
       - run: uvx ruff@0.17.3 format --check
       - run: uvx ruff@0.17.3 check
