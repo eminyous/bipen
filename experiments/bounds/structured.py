@@ -30,7 +30,7 @@ def bounds_row(family, U, p="", s=""):
         Column.M1: m1,
         Column.M2: m2,
         Column.P: p,
-        Column.SEED: s,
+        Column.INDEX: s,
         Column.EDGES: int(U.sum()),
         Column.G: g,
         Column.H: biclique_ratio(U),
@@ -61,4 +61,4 @@ def main(data):
             print(family, U.shape, p, s, row[Column.SECONDS], flush=True)
             yield row
 
-    write_csv(data / File.STRUCTURED_BOUNDS, rows())
+    write_csv(data / File.BOUNDS_STRUCTURED, rows())

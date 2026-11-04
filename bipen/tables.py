@@ -55,7 +55,7 @@ def exact_mean(values):
 def random_graphs(data):
     """The random graphs of Table 1 from every results file, one row per graph."""
     rows = {}
-    for name in (File.STRUCTURED_BOUNDS, File.UNBALANCED_BOUNDS, File.RANDOM_BOUNDS):
+    for name in (File.BOUNDS_STRUCTURED, File.BOUNDS_UNBALANCED, File.BOUNDS_SAMPLED):
         if (data / name).exists():
             for row in read_csv(data / name):
                 if row[Column.FAMILY] == Family.RANDOM and row[Column.RHO1] not in ("", "nan"):
@@ -106,7 +106,7 @@ def bounds_table(data, tables):
 def matchings_table(data, tables):
     """Table 2: the bounds on the perfect matchings sK_2."""
     rows = sorted(
-        (row for row in read_csv(data / File.STRUCTURED_BOUNDS) if row[Column.FAMILY] == Family.MATCHING),
+        (row for row in read_csv(data / File.BOUNDS_STRUCTURED) if row[Column.FAMILY] == Family.MATCHING),
         key=lambda row: int(row[Column.M1]),
     )
     write(
@@ -126,7 +126,7 @@ def penalty_row_graph(row):
     """The graph of a row of the smallest penalty: a random graph, or N_k."""
     m1, m2 = int(row[Column.M1]), int(row[Column.M2])
     if row[Column.FAMILY] == Family.RANDOM:
-        return penalty_graph(m1, m2, float(row[Column.P]), int(row[Column.SEED]))
+        return penalty_graph(m1, m2, float(row[Column.P]), int(row[Column.INDEX]))
     return near_biclique(m2)
 
 
@@ -140,7 +140,7 @@ def thresholds_table(data, tables):
     # Gillis and Glineur, Lemma 3: 2 gamma - 1 >= the square root of the number of edges of the bipartite complement
     gamma3 = lambda row: (1 + np.sqrt(int(row[Column.M1]) * int(row[Column.M2]) - int(row[Column.EDGES]))) / 2
     gamma4 = lambda row: (1 + np.linalg.norm(1 - penalty_row_graph(row), 2)) / 2
-    rows = read_csv(data / File.SMALLEST_PENALTY)
+    rows = read_csv(data / File.PENALTY_SMALLEST)
     groups = defaultdict(list)
     for row in rows:
         if row[Column.FAMILY] == Family.RANDOM and float(row[Column.G]) >= 1:
@@ -168,7 +168,7 @@ def ascent_table(data, tables):
     """Table 4 and Table C.2: for each kind of start, size, p and penalty, the mean fraction of starts from which the
     ascent ends at a maximum pair, without and with repair, and the number of graphs where some start does."""
     groups = defaultdict(list)
-    for row in read_csv(data / File.LOCAL_ASCENT):
+    for row in read_csv(data / File.PENALTY_ASCENT):
         groups[(row[Column.STARTS], int(row[Column.M1]), float(row[Column.P]))].append(row)
     out = []
     for starts, m, p in sorted(groups, key=lambda key: (key[0] != Starts.RANDOM, key[1], key[2])):
@@ -185,7 +185,7 @@ def ascent_table(data, tables):
 def dsos_table(data, tables):
     """Table B.1: the DSOS bounds by level, one row per graph."""
     graphs = defaultdict(dict)
-    for row in read_csv(data / File.DSOS_BOUNDS):
+    for row in read_csv(data / File.POLYA_DSOS):
         graphs[row[Column.GRAPH]].update(
             {
                 "graph": row[Column.GRAPH],
@@ -216,28 +216,28 @@ def random_graph_values(data):
 
 
 def lasserre_values(data):
-    graphs = read_csv(data / File.LASSERRE_COMPARISON)
+    graphs = read_csv(data / File.BOUNDS_LASSERRE)
     v = {"lasserregraphs": len(graphs), "lasserrerhooneexact": sum(is_exact(row, Column.RHO1) for row in graphs)}
     # the one 20+20 graph on which neither rho^(1) nor the Lasserre bound is exact
     [weak] = [
         row
-        for row in read_csv(data / File.lasserre_size(20))
-        if not is_exact(row, Column.RHO1) and not is_exact(row, Column.LASSERRE)
+        for row in read_csv(data / File.bounds_lasserre_size(20))
+        if not is_exact(row, Column.RHO1) and not is_exact(row, Column.HALF_SQRT_G2)
     ]
-    v["weaklasserre"] = float(weak[Column.LASSERRE])
+    v["weaklasserre"] = float(weak[Column.HALF_SQRT_G2])
     v["weakrhoone"] = float(weak[Column.RHO1])
     v["weakhalfsqrtg"] = half_sqrt_g(weak)
     return v
 
 
 def polya_values(data):
-    levels = [row for row in read_csv(data / File.POLYA_BOUNDS) if row[Column.GRAPH] == Graph.MATCHING_3]
+    levels = [row for row in read_csv(data / File.POLYA_LEVELS) if row[Column.GRAPH] == Graph.MATCHING_3]
     top = max(levels, key=lambda row: int(row[Column.LEVEL]))
     return {"polyalevel": int(top[Column.LEVEL]), "polyaratio": float(top[Column.ZETA]) / half_sqrt_g(top)}
 
 
 def penalty_values(data):
-    graphs = [row for row in read_csv(data / File.SMALLEST_PENALTY) if row[Column.FAMILY] == Family.RANDOM]
+    graphs = [row for row in read_csv(data / File.PENALTY_SMALLEST) if row[Column.FAMILY] == Family.RANDOM]
     return {
         "penaltygraphs": len(graphs),
         "penaltyratio": max(float(row[Column.GAMMA_STAR]) / float(row[Column.GAMMA1]) for row in graphs),
@@ -245,7 +245,7 @@ def penalty_values(data):
 
 
 def ascent_values(data):
-    runs = read_csv(data / File.LOCAL_ASCENT)
+    runs = read_csv(data / File.PENALTY_ASCENT)
     groups = defaultdict(list)
     for row in runs:
         groups[(row[Column.STARTS], int(row[Column.M1]), float(row[Column.P]), row[Column.PENALTY])].append(row)
@@ -290,7 +290,7 @@ def ascent_values(data):
 def rho_gap_values(data):
     return {
         "dualgap": max(
-            abs(float(row[Column.PRIMAL]) - float(row[Column.DUAL])) for row in read_csv(data / File.RHO_GAPS)
+            abs(float(row[Column.PRIMAL]) - float(row[Column.DUAL])) for row in read_csv(data / File.BOUNDS_INEXACT)
         )
     }
 

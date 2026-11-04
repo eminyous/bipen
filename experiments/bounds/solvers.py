@@ -32,7 +32,7 @@ def graphs(data):
     relative_gap = lambda row: (
         (float(row[Column.PRIMAL]) - float(row[Column.HALF_SQRT_G])) / float(row[Column.HALF_SQRT_G])
     )
-    largest_gaps = sorted(read_csv(data / File.RHO_GAPS), key=relative_gap, reverse=True)[:3]
+    largest_gaps = sorted(read_csv(data / File.BOUNDS_INEXACT), key=relative_gap, reverse=True)[:3]
     return [(m, m, 0.5, 0) for m in (6, 8, 10, 12, 15, 20)] + [graph_key(row) for row in largest_gaps]
 
 
@@ -48,7 +48,7 @@ def job(task):
         Column.M1: m1,
         Column.M2: m2,
         Column.P: p,
-        Column.SEED: s,
+        Column.INDEX: s,
         Column.SOLVER: solver.lower(),
         Column.TOLERANCE: tol or "default",
         Column.BOUND: bound,
@@ -69,5 +69,5 @@ def main(data, workers=2):
             yield row
 
     with Pool(workers, maxtasksperchild=1) as pool:
-        write_csv(data / File.SOLVER_COMPARISON, rows(pool))
+        write_csv(data / File.BOUNDS_SOLVERS, rows(pool))
     print("finished", flush=True)

@@ -27,7 +27,7 @@ def job(graph):
 
 
 def main(data, workers=2):
-    out, structured = data / File.RANDOM_BOUNDS, data / File.STRUCTURED_BOUNDS
+    out, structured = data / File.BOUNDS_SAMPLED, data / File.BOUNDS_STRUCTURED
     if not out.exists() and structured.exists():
         write_csv(
             out,

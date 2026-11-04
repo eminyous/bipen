@@ -32,4 +32,4 @@ def main(data):
                 print(name, r, value, flush=True)
                 yield {Column.GRAPH: name, Column.HALF_SQRT_G: half_sqrt_g, Column.LEVEL: r, Column.ZETA_TILDE: value}
 
-    write_csv(data / File.DSOS_BOUNDS, rows())
+    write_csv(data / File.POLYA_DSOS, rows())

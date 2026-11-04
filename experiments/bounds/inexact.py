@@ -29,7 +29,7 @@ def non_exact(data):
     """The random graphs where rho^(1) exceeds sqrt(g)/2 by more than EXACT, largest first."""
     graphs = [
         graph_key(row)
-        for row in read_csv(data / File.RANDOM_BOUNDS)
+        for row in read_csv(data / File.BOUNDS_SAMPLED)
         if float(row[Column.RHO1]) - float(row[Column.HALF_SQRT_G]) > EXACT
     ]
     return sorted(graphs, key=lambda graph: -(graph[0] + graph[1]))
@@ -59,7 +59,7 @@ def job(graph):
         Column.M1: m1,
         Column.M2: m2,
         Column.P: p,
-        Column.SEED: s,
+        Column.INDEX: s,
         Column.STATUS: status,
         Column.PRIMAL: primal,
         Column.DUAL: dual,
@@ -77,4 +77,4 @@ def main(data, workers=2):
             yield row
 
     with Pool(workers) as pool:
-        write_csv(data / File.RHO_GAPS, rows(pool))
+        write_csv(data / File.BOUNDS_INEXACT, rows(pool))

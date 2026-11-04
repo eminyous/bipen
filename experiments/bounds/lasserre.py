@@ -36,17 +36,17 @@ def job(graph):
         Column.M1: m,
         Column.M2: m,
         Column.P: p,
-        Column.SEED: s,
+        Column.INDEX: s,
         Column.HALF_SQRT_G: 0.5 * np.sqrt(biclique_number(U)),
         Column.RHO1: rho,
-        Column.LASSERRE: 0.5 * np.sqrt(g2),
-        Column.RHO1_SECONDS: rho_seconds,
-        Column.LASSERRE_SECONDS: lasserre_seconds,
+        Column.HALF_SQRT_G2: 0.5 * np.sqrt(g2),
+        Column.SECONDS_RHO1: rho_seconds,
+        Column.SECONDS_LASSERRE: lasserre_seconds,
     }
 
 
 def main(data, workers=2, size=None, seeds=10):
-    sizes, name = (SIZES, File.LASSERRE_COMPARISON) if size is None else ([size], File.lasserre_size(size))
+    sizes, name = (SIZES, File.BOUNDS_LASSERRE) if size is None else ([size], File.bounds_lasserre_size(size))
     todo = sorted([(m, p, s) for m in sizes for p in PS for s in range(seeds)], key=lambda graph: -graph[0])
 
     def rows(pool):

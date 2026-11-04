@@ -39,4 +39,4 @@ def main(data):
                     Column.ZETA: value,
                 }
 
-    write_csv(data / File.POLYA_BOUNDS, rows())
+    write_csv(data / File.POLYA_LEVELS, rows())

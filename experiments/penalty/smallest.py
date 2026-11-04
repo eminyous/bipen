@@ -30,7 +30,7 @@ def penalty_row(family, U, p="", s=""):
         Column.M1: m1,
         Column.M2: m2,
         Column.P: p,
-        Column.SEED: s,
+        Column.INDEX: s,
         Column.EDGES: int(U.sum()),
         Column.G: g,
         Column.GAMMA_STAR: smallest_penalty(U),
@@ -52,5 +52,5 @@ def main(data, workers=6):
     with Pool(workers) as pool:
         rows = [row for row in pool.map(job, todo, chunksize=8) if row is not None]
     rows += [penalty_row(Family.NEAR_BICLIQUE, near_biclique(k)) for k in range(2, 6)]
-    write_csv(data / File.SMALLEST_PENALTY, rows)
+    write_csv(data / File.PENALTY_SMALLEST, rows)
     print(len(rows), "rows written")

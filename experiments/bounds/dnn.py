@@ -26,7 +26,8 @@ def gap(U):
 
 
 def main(data):
-    with (data / File.DNN_EXACTNESS).open("w") as f:
+    (data / File.BOUNDS_DNN).parent.mkdir(parents=True, exist_ok=True)
+    with (data / File.BOUNDS_DNN).open("w") as f:
         for m1, m2 in [(2, 3), (3, 3), (2, 4), (3, 4), (2, 5)]:
             worst = 0.0
             for bits in itertools.product([0, 1], repeat=m1 * m2):

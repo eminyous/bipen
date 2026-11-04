@@ -3,7 +3,7 @@
 Block-coordinate ascent on max y^T H_gamma z over nonnegative unit vectors, with H_gamma = J - 2 gamma U.
 
 Graphs: the first 20 random graphs of Table 1 of the sizes 10+10, 15+15 and 20+20 and each p in {0.3, 0.5, 0.7}.
-Penalties: gamma_1 = (1 + sqrt g)/2, which rounding rho^(1) (read from the random bounds) gives on every graph;
+Penalties: gamma_1 = (1 + sqrt g)/2, which rounding rho^(1) (read from bounds/sampled) gives on every graph;
 gamma_2 = (1 + max(m1, m2))/2; gamma_3 = (1 + sqrt |E(G^)|)/2, with G^ the bipartite complement;
 gamma_4 = (1 + |J - U|_2)/2; and 1/2 + c sqrt(g)/2 below gamma_1, for c = 1/4, 1/2 and 3/4.
 Starts: 100 random pairs (y, z) (numpy.random.default_rng(s) for the graph of index s), and the n vertices, that is,
@@ -106,7 +106,7 @@ def job(graph):
                     Column.M1: m,
                     Column.M2: m,
                     Column.P: p,
-                    Column.SEED: s,
+                    Column.INDEX: s,
                     Column.G: g,
                     Column.PENALTY: name,
                     Column.GAMMA: gamma,
@@ -118,8 +118,8 @@ def job(graph):
 
 
 def main(data, workers=2):
-    RHO.update({graph_key(row): float(row[Column.RHO1]) for row in read_csv(data / File.RANDOM_BOUNDS)})
+    RHO.update({graph_key(row): float(row[Column.RHO1]) for row in read_csv(data / File.BOUNDS_SAMPLED)})
     todo = [(m, p, s) for m in SIZES for p in PS for s in range(GRAPHS)]
     with Pool(workers) as pool:
-        write_csv(data / File.LOCAL_ASCENT, (row for rows in pool.imap_unordered(job, todo) for row in rows))
+        write_csv(data / File.PENALTY_ASCENT, (row for rows in pool.imap_unordered(job, todo) for row in rows))
     print("finished", flush=True)

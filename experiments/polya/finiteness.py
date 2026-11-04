@@ -41,6 +41,6 @@ def main(data):
                     Column.FIRST_FINITE_LEVEL: first_finite_level(U, a),
                 }
             )
-    write_csv(data / File.POLYA_FIRST_FINITE_LEVEL, rows)
+    write_csv(data / File.POLYA_FINITENESS, rows)
     exceptions = sum(row[Column.FIRST_FINITE_LEVEL] != row[Column.ALPHA_STAR] - 1 for row in rows)
     print("graphs where the first finite level is not alpha* - 1:", exceptions)
