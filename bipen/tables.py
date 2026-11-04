@@ -11,7 +11,7 @@ from fractions import Fraction
 
 import numpy as np
 
-from bipen.data import Column, Family, File, Graph, Penalty, Starts, graph_key, read_csv
+from bipen.data import Column, Family, File, Graph, Penalty, Starts, graph_key, read_csv, require
 from bipen.graphs import near_biclique, penalty_graph
 from bipen.penalty import BISECTION_TOL
 from bipen.sdp import MOSEK_TOL
@@ -307,7 +307,22 @@ def values(data, tables):
     write(tables / "values.csv", [{"name": name, "value": x} for name, x in v.items()])
 
 
+# the data files the tables read; BOUNDS_UNBALANCED is read only when it exists
+NEEDS = [
+    File.BOUNDS_STRUCTURED,
+    File.BOUNDS_SAMPLED,
+    File.BOUNDS_INEXACT,
+    File.BOUNDS_LASSERRE,
+    File.bounds_lasserre_size(20),
+    File.PENALTY_SMALLEST,
+    File.PENALTY_ASCENT,
+    File.POLYA_LEVELS,
+    File.POLYA_DSOS,
+]
+
+
 def build(data, tables):
+    require(data, NEEDS)
     tables.mkdir(parents=True, exist_ok=True)
     bounds(data, tables)
     matchings(data, tables)

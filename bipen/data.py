@@ -26,6 +26,14 @@ class File:
         """The Lasserre comparison run on one size m + m only."""
         return f"bounds/lasserre_{m}.csv"
 
+    @staticmethod
+    def command(name):
+        """The command that writes the data file name."""
+        stem = name.rsplit(".", 1)[0]
+        if stem.startswith("bounds/lasserre_"):
+            return f"bipen run bounds/lasserre --size {stem.removeprefix('bounds/lasserre_')} --seeds 3"
+        return f"bipen run {stem}"
+
 
 class Column:
     FAMILY = "family"
@@ -131,6 +139,19 @@ def graph_key(row):
 def read_csv(path):
     with path.open(newline="") as f:
         return list(csv.DictReader(f))
+
+
+def require(data, names):
+    """Stop, before anything is written, if a data file is missing or has no rows, naming the commands to run."""
+    problems = []
+    for name in names:
+        path = data / name
+        if not path.exists():
+            problems.append(f"{path} is missing: {File.command(name)}")
+        elif not read_csv(path):
+            problems.append(f"{path} has no rows: {File.command(name)}")
+    if problems:
+        raise SystemExit("Run the experiments first:\n  " + "\n  ".join(problems))
 
 
 def write_csv(path, rows, mode="w"):

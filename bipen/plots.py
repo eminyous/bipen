@@ -7,7 +7,7 @@ import csv
 import math
 from collections import defaultdict
 
-from bipen.data import Column, File, Graph, read_csv
+from bipen.data import Column, File, Graph, read_csv, require
 
 CURVES = {
     Graph.LPV_EXAMPLE: "oneedge",
@@ -31,5 +31,6 @@ def polya_figure(data, figures):
 
 
 def build(data, figures):
+    require(data, [File.POLYA_LEVELS])
     figures.mkdir(parents=True, exist_ok=True)
     polya_figure(data, figures)
