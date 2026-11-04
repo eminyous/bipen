@@ -1,8 +1,9 @@
-"""Polya LP cone C^(r) (Bomze-de Klerk 2002, Thm 2.4) applied to the copositive dual
+"""The Pólya bounds of Section 5: the copositive dual with the Pólya cone P^(r) of Bomze and de Klerk,
 
-    zeta^(r)(G) = min { lambda : lambda I - C + sum_E y_ij (E_ij + E_ji) in C^(r) },
+    zeta^(r)(G) = min { lambda : lambda I - C + Y in P^(r) },
 
-with C^(r) = { M : m^T M m - m^T diag(M) >= 0 for all m in N^n with |m| = r + 2 }.
+where P^(r) = { M : nu^T M nu - nu^T diag(M) >= 0 for all nu in N^n with |nu| = r + 2 }; zeta^(r) is inf when the
+program is infeasible.
 """
 
 import itertools
@@ -10,18 +11,19 @@ import itertools
 import cvxpy as cp
 import numpy as np
 
-from bipen.sdp import _dual_matrix, _solve
+from bipen.sdp import dual_matrix, solve
 
 
-def multi_indices(n, s):
-    for c in itertools.combinations_with_replacement(range(n), s):
-        m = np.zeros(n)
-        for i in c:
-            m[i] += 1
-        yield m
+def multi_indices(n, size):
+    """The vectors nu in N^n with |nu| = size."""
+    for support in itertools.combinations_with_replacement(range(n), size):
+        nu = np.zeros(n)
+        for i in support:
+            nu[i] += 1
+        yield nu
 
 
-def zeta(B, r):
-    lam, M, n = _dual_matrix(B)
-    cons = [m @ M @ m - m @ cp.diag(M) >= 0 for m in multi_indices(n, r + 2)]
-    return _solve(cp.Problem(cp.Minimize(lam), cons))
+def zeta(U, r):
+    lam, M, n = dual_matrix(U)
+    constraints = [nu @ M @ nu - nu @ cp.diag(M) >= 0 for nu in multi_indices(n, r + 2)]
+    return solve(cp.Problem(cp.Minimize(lam), constraints))
