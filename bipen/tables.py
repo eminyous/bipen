@@ -1,58 +1,84 @@
-"""The numbers of the tables of the paper, read from a data folder and written as CSV files to a tables folder; the
-paper typesets them. Column names use letters only, as csvsimple turns them into macros. Run with: bipen tables
+"""The numbers of the tables of the paper, read from the data folder and written as CSV files to the tables folder,
+which the paper typesets. Column names use letters only, as csvsimple turns them into macros; the file and column
+names of the data folder are those of bipen.data.
+Run with: bipen tables
 """
 
 import csv
-import os
 from collections import defaultdict
 from decimal import Decimal
 from fractions import Fraction
 
 import numpy as np
 
-from bipen.graphs import random_bipartite
+from bipen.data import Column, Family, File, Graph, Penalty, Starts, graph_key, read_csv
+from bipen.graphs import near_biclique, penalty_graph
+from bipen.penalty import BISECTION_TOL
 from bipen.sdp import MOSEK_TOL
-from experiments.smallest_penalty import BISECTION_TOL
 
-TOL = 1e-5
+TOL = 1e-5  # a bound is exact when it exceeds sqrt(g)/2 by less than TOL
 ROUND = 1e-6  # added to 4 b^2 before rounding a bound b down to g
-BOUNDS = {"h1": "hone", "h1_dnn": "honednn", "k1": "rhoone"}
-PENALTIES = {"gamma1": "gammaone", "gamma2": "gammatwo", "gamma3": "gammathree", "gamma4": "gammafour",
-             "gamma_c25": "cquarter", "gamma_c50": "chalf", "gamma_c75": "cthreequarters"}
+BOUNDS = {Column.H1: "hone", Column.H1_DNN: "honednn", Column.RHO1: "rhoone"}  # data column: name in the tables
+PENALTIES = {
+    Penalty.GAMMA1: "gammaone",
+    Penalty.GAMMA2: "gammatwo",
+    Penalty.GAMMA3: "gammathree",
+    Penalty.GAMMA4: "gammafour",
+    Penalty.below(0.25): "cquarter",
+    Penalty.below(0.5): "chalf",
+    Penalty.below(0.75): "cthreequarters",
+}
 
 
-def write(tables, name, rows):
-    with open(os.path.join(tables, name), "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=rows[0].keys())
-        w.writeheader()
-        w.writerows(rows)
+def write(path, rows):
+    with path.open("w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=rows[0].keys())
+        writer.writeheader()
+        writer.writerows(rows)
 
 
-def mean(values):
-    """Exact mean of fractions of runs (k/100 or k/(2m)), to twelve decimals, so that the paper's rounding half up
+def half_sqrt_g(row):
+    return float(row[Column.HALF_SQRT_G])
+
+
+def is_exact(row, column):
+    return float(row[column]) - half_sqrt_g(row) < TOL
+
+
+def exact_mean(values):
+    """The exact mean of fractions of runs (k/100 or k/(2m)), to twelve decimals, so that the paper's rounding half up
     does not depend on the order of the rows."""
     q = sum(Fraction(v).limit_denominator(1000) for v in values) / len(values)
     return (Decimal(q.numerator) / Decimal(q.denominator)).quantize(Decimal("1e-12")).normalize()
 
 
-def load(data):
-    """Random graphs from every results file, one row per (m, k, p, seed)."""
+def random_graphs(data):
+    """The random graphs of Table 1 from every results file, one row per graph."""
     rows = {}
-    for name in ("bounds.csv", "bounds_unbalanced.csv", "random.csv"):
-        path = os.path.join(data, name)
-        if os.path.exists(path):
-            for r in csv.DictReader(open(path)):
-                if r["family"] == "random" and r["k1"] not in ("", "nan"):
-                    rows[(int(r["m"]), int(r["k"]), float(r["p"]), int(r["seed"]))] = r
+    for name in (File.STRUCTURED_BOUNDS, File.UNBALANCED_BOUNDS, File.RANDOM_BOUNDS):
+        if (data / name).exists():
+            for row in read_csv(data / name):
+                if row[Column.FAMILY] == Family.RANDOM and row[Column.RHO1] not in ("", "nan"):
+                    rows[graph_key(row)] = row
     return list(rows.values())
 
 
-def gaps(G):
-    """Number of graphs, number on which each bound is exact, and mean and max gap in percent of 1/2 sqrt(g)."""
-    half = np.array([float(r["half_sqrt_g"]) for r in G])
-    out = {"count": len(G)}
-    for key, name in BOUNDS.items():
-        gap = np.array([float(r[key]) for r in G]) - half
+def by_size(data):
+    """The random graphs by size, balanced sizes first, each block ordered by shape and then by size."""
+    groups = defaultdict(list)
+    for row in random_graphs(data):
+        groups[(int(row[Column.M1]), int(row[Column.M2]))].append(row)
+    order = sorted(groups, key=lambda size: (size[0] < size[1], size[1] // size[0], size[0] + size[1]))
+    return [("balanced" if m1 == m2 else "unbalanced", m1, m2, groups[(m1, m2)]) for m1, m2 in order]
+
+
+def gaps(graphs):
+    """The number of graphs, and for each bound the number on which it is exact and its mean and maximum gap, in
+    percent of sqrt(g)/2."""
+    half = np.array([half_sqrt_g(row) for row in graphs])
+    out = {"count": len(graphs)}
+    for column, name in BOUNDS.items():
+        gap = np.array([float(row[column]) for row in graphs]) - half
         gap[gap < TOL] = 0.0
         out["exact" + name] = int((gap == 0).sum())
         out["mean" + name] = float((100 * gap / half).mean())
@@ -60,162 +86,228 @@ def gaps(G):
     return out
 
 
-def sizes(data):
-    """The random graphs by size, balanced sizes first, each block by shape and then by size."""
+def bounds_table(data, tables):
+    """Table 1 and Table C.1: the bounds on the random graphs, one row per size, then one per size and p."""
+    sizes = by_size(data)
+    rows = [{"block": block, "size": f"{m1}+{m2}", "p": "all", **gaps(graphs)} for block, m1, m2, graphs in sizes]
+    rows += [
+        {
+            "block": block,
+            "size": f"{m1}+{m2}",
+            "p": f"{p:g}",
+            **gaps([row for row in graphs if float(row[Column.P]) == p]),
+        }
+        for block, m1, m2, graphs in sizes
+        for p in sorted({float(row[Column.P]) for row in graphs})
+    ]
+    write(tables / "bounds.csv", rows)
+
+
+def matchings_table(data, tables):
+    """Table 2: the bounds on the perfect matchings sK_2."""
+    rows = sorted(
+        (row for row in read_csv(data / File.STRUCTURED_BOUNDS) if row[Column.FAMILY] == Family.MATCHING),
+        key=lambda row: int(row[Column.M1]),
+    )
+    write(
+        tables / "matchings.csv",
+        [
+            {
+                "r": row[Column.M1],
+                "halfsqrtg": row[Column.HALF_SQRT_G],
+                **{name: row[column] for column, name in BOUNDS.items()},
+            }
+            for row in rows
+        ],
+    )
+
+
+def penalty_row_graph(row):
+    """The graph of a row of the smallest penalty: a random graph, or N_k."""
+    m1, m2 = int(row[Column.M1]), int(row[Column.M2])
+    if row[Column.FAMILY] == Family.RANDOM:
+        return penalty_graph(m1, m2, float(row[Column.P]), int(row[Column.SEED]))
+    return near_biclique(m2)
+
+
+def thresholds_table(data, tables):
+    """Table 3: the smallest valid penalty gamma* against gamma_1 = (1 + sqrt g)/2, and gamma_1 against gamma_2 and
+    gamma_3 of Gillis and Glineur and the spectral threshold gamma_4, as ratios computed graph by graph: the mean and
+    the maximum or minimum over the random graphs of each size, and the value on each N_k."""
+    gamma_star = lambda row: float(row[Column.GAMMA_STAR])
+    gamma1 = lambda row: float(row[Column.GAMMA1])
+    gamma2 = lambda row: float(row[Column.GAMMA2])
+    # Gillis and Glineur, Lemma 3: 2 gamma - 1 >= the square root of the number of edges of the bipartite complement
+    gamma3 = lambda row: (1 + np.sqrt(int(row[Column.M1]) * int(row[Column.M2]) - int(row[Column.EDGES]))) / 2
+    gamma4 = lambda row: (1 + np.linalg.norm(1 - penalty_row_graph(row), 2)) / 2
+    rows = read_csv(data / File.SMALLEST_PENALTY)
     groups = defaultdict(list)
-    for r in load(data):
-        groups[(int(r["m"]), int(r["k"]))].append(r)
-    order = sorted(groups, key=lambda mk: (mk[0] < mk[1], mk[1] // mk[0], mk[0] + mk[1]))
-    return [("balanced" if m == k else "unbalanced", m, k, groups[(m, k)]) for m, k in order]
-
-
-def bounds(data, tables):
-    """The bounds on the random graphs, one row per size with p = all, then one per size and edge probability."""
-    rows = [{"block": b, "size": f"{m}+{k}", "p": "all", **gaps(G)} for b, m, k, G in sizes(data)]
-    rows += [{"block": b, "size": f"{m}+{k}", "p": f"{p:g}", **gaps([r for r in G if float(r["p"]) == p])}
-             for b, m, k, G in sizes(data) for p in sorted({float(r["p"]) for r in G})]
-    write(tables, "bounds.csv", rows)
-
-
-def matchings(data, tables):
-    """The bounds on the perfect matchings M_r."""
-    rows = [r for r in csv.DictReader(open(os.path.join(data, "bounds.csv"))) if r["family"] == "matching"]
-    write(tables, "matchings.csv", [{"r": r["m"], "halfsqrtg": r["half_sqrt_g"], "hone": r["h1"], "honednn": r["h1_dnn"],
-                                     "rhoone": r["k1"]} for r in sorted(rows, key=lambda r: int(r["m"]))])
-
-
-def biadjacency(r):
-    """The graph of a row of smallest_penalty.csv: a random graph from its seed, or N_k with its single edge."""
-    m, k = int(r["m"]), int(r["k"])
-    if r["family"] == "random":
-        p, s = float(r["p"]), int(r["seed"])
-        return random_bipartite(m, k, p, np.random.default_rng(100000 * k + 1000 * m + 100 * int(10 * p) + s))
-    B = np.zeros((m, k))
-    B[0, 0] = 1
-    return B
-
-
-def thresholds(data, tables):
-    """The smallest valid penalty gamma* against the threshold (1 + sqrt g)/2, those of Gillis and Glineur and the
-    spectral one, as ratios computed graph by graph: mean and max or min over the random graphs of each size, and the
-    value on each N_k."""
-    rows = list(csv.DictReader(open(os.path.join(data, "smallest_penalty.csv"))))
-    ours = lambda r: float(r["bound_sqrt_g"])
-    # Gillis-Glineur, Lemma 3: 2*gamma - 1 >= sqrt of the number of edges of the bipartite complement
-    lemma3 = lambda r: (1 + np.sqrt(int(r["m"]) * int(r["k"]) - int(r["edges"]))) / 2
-    spectral = lambda r: (1 + np.linalg.norm(1 - biadjacency(r), 2)) / 2
-    ratios = {"gammastarover": lambda r: float(r["d_star"]) / ours(r), "gammaoneovertwo": lambda r: ours(r) / float(r["bound_gg"]),
-              "gammaoneoverthree": lambda r: ours(r) / lemma3(r), "gammaoneoverfour": lambda r: ours(r) / spectral(r)}
-    groups = defaultdict(list)
-    for r in rows:
-        if r["family"] == "random" and float(r["g"]) >= 1:
-            groups[f"{r['m']}+{r['k']}"].append(r)
-    for r in sorted((r for r in rows if r["family"] == "near-biclique"), key=lambda r: int(r["k"])):
-        groups[r["k"]] = [r]
+    for row in rows:
+        if row[Column.FAMILY] == Family.RANDOM and float(row[Column.G]) >= 1:
+            groups[f"{row[Column.M1]}+{row[Column.M2]}"].append(row)
+    for row in sorted(
+        (row for row in rows if row[Column.FAMILY] == Family.NEAR_BICLIQUE), key=lambda row: int(row[Column.M2])
+    ):
+        groups[row[Column.M2]] = [row]
     out = []
-    for key, G in groups.items():
-        row = {"family": "random" if "+" in key else "nearbiclique", "graphs": key, "count": len(G)}
-        for name, f in ratios.items():
-            v = [f(r) for r in G]
-            star = name == "gammastarover"
-            row[name + ("one" if star else "") + "mean"] = float(np.mean(v))
-            row[name + ("onemax" if star else "min")] = max(v) if star else min(v)
+    for key, graphs in groups.items():
+        row = {"family": "random" if "+" in key else "nearbiclique", "graphs": key, "count": len(graphs)}
+        star = [gamma_star(r) / gamma1(r) for r in graphs]
+        row["gammastaroveronemean"], row["gammastaroveronemax"] = float(np.mean(star)), max(star)
+        for name, gamma in (("two", gamma2), ("three", gamma3), ("four", gamma4)):
+            ratios = [gamma1(r) / gamma(r) for r in graphs]
+            row["gammaoneover" + name + "mean"], row["gammaoneover" + name + "min"] = (
+                float(np.mean(ratios)),
+                min(ratios),
+            )
         out.append(row)
-    write(tables, "thresholds.csv", out)
+    write(tables / "thresholds.csv", out)
 
 
-def local_ascent(data, tables):
-    """Block-coordinate ascent with the seven penalties, from random starts and from the vertices: for each size, edge
-    probability and penalty, the mean fraction of starts that end at a maximum pair, without and with repair, and the
-    number of graphs where some start does."""
+def ascent_table(data, tables):
+    """Table 4 and Table C.2: for each kind of start, size, p and penalty, the mean fraction of starts from which the
+    ascent ends at a maximum pair, without and with repair, and the number of graphs where some start does."""
     groups = defaultdict(list)
-    for r in csv.DictReader(open(os.path.join(data, "local_ascent.csv"))):
-        groups[(r["starts"], int(r["m"]), float(r["p"]))].append(r)
+    for row in read_csv(data / File.LOCAL_ASCENT):
+        groups[(row[Column.STARTS], int(row[Column.M1]), float(row[Column.P]))].append(row)
     out = []
-    for starts, m, p in sorted(groups, key=lambda k: (k[0] != "random", k[1], k[2])):
+    for starts, m, p in sorted(groups, key=lambda key: (key[0] != Starts.RANDOM, key[1], key[2])):
         row = {"starts": starts, "size": f"{m}+{m}", "p": f"{p:g}"}
-        for key, name in PENALTIES.items():
-            G = [r for r in groups[(starts, m, p)] if r["threshold"] == key]
-            row[name + "success"] = mean([r["success"] for r in G])
-            row[name + "repaired"] = mean([r["repaired"] for r in G])
-            row[name + "graphs"] = sum(float(r["success"]) > 0 for r in G)
+        for penalty, name in PENALTIES.items():
+            runs = [r for r in groups[(starts, m, p)] if r[Column.PENALTY] == penalty]
+            row[name + "success"] = exact_mean([r[Column.SUCCESS] for r in runs])
+            row[name + "repaired"] = exact_mean([r[Column.REPAIRED] for r in runs])
+            row[name + "graphs"] = sum(float(r[Column.SUCCESS]) > 0 for r in runs)
         out.append(row)
-    write(tables, "ascent.csv", out)
+    write(tables / "ascent.csv", out)
 
 
-def dsos_levels(data, tables):
-    """The DSOS bounds by level, one row per graph."""
+def dsos_table(data, tables):
+    """Table B.1: the DSOS bounds by level, one row per graph."""
     graphs = defaultdict(dict)
-    for r in csv.DictReader(open(os.path.join(data, "dsos_levels.csv"))):
-        graphs[r["graph"]].update({"graph": r["graph"], "halfsqrtg": r["half_sqrt_g"],
-                                   "level" + ["zero", "one", "two"][int(r["r"])]: r["zeta_dsos"]})
-    write(tables, "dsos.csv", list(graphs.values()))
+    for row in read_csv(data / File.DSOS_BOUNDS):
+        graphs[row[Column.GRAPH]].update(
+            {
+                "graph": row[Column.GRAPH],
+                "halfsqrtg": row[Column.HALF_SQRT_G],
+                "level" + ["zero", "one", "two"][int(row[Column.LEVEL])]: row[Column.ZETA_TILDE],
+            }
+        )
+    write(tables / "dsos.csv", list(graphs.values()))
 
 
-def values(data, tables):
-    """The numbers quoted in the text of the paper, one per row: counts, extremes and the tolerances of the code."""
-    half = lambda r: float(r["half_sqrt_g"])
-    exact = lambda r, key: float(r[key]) - half(r) < TOL
-    v = {"exacttol": TOL, "roundoffset": ROUND, "solvertol": MOSEK_TOL, "bisectiontol": BISECTION_TOL}
+# The numbers quoted in the text of the paper, by section, for values.csv
 
-    R = load(data)
-    gap = [float(r["k1"]) - half(r) for r in R]
-    v["graphs"] = len(R)
-    v["rhooneexact"] = sum(exact(r, "k1") for r in R)
-    v["rhooneinexact"] = len(R) - v["rhooneexact"]
-    v["rhooneinexactsparse"] = sum(not exact(r, "k1") and float(r["p"]) == 0.3 for r in R)
-    v["rhoonemaxgap"] = max(100 * x / half(r) for r, x in zip(R, gap))
+
+def random_graph_values(data):
+    graphs = random_graphs(data)
+    gap = [float(row[Column.RHO1]) - half_sqrt_g(row) for row in graphs]
+    v = {"graphs": len(graphs)}
+    v["rhooneexact"] = sum(is_exact(row, Column.RHO1) for row in graphs)
+    v["rhooneinexact"] = len(graphs) - v["rhooneexact"]
+    v["rhooneinexactsparse"] = sum(not is_exact(row, Column.RHO1) and float(row[Column.P]) == 0.3 for row in graphs)
+    v["rhoonemaxgap"] = max(100 * x / half_sqrt_g(row) for row, x in zip(graphs, gap))
     v["gapbelow"] = max(x for x in gap if x < TOL)
     v["gapabove"] = min(x for x in gap if x >= TOL)
-    v["solvererror"] = max(half(r) - float(r[key]) for r in R for key in BOUNDS)
-    for key, name in BOUNDS.items():
-        v["round" + name] = sum(int(4 * float(r[key]) ** 2 + ROUND) == int(float(r["g"])) for r in R)
+    v["solvererror"] = max(half_sqrt_g(row) - float(row[column]) for row in graphs for column in BOUNDS)
+    for column, name in BOUNDS.items():
+        v["round" + name] = sum(int(4 * float(row[column]) ** 2 + ROUND) == int(float(row[Column.G])) for row in graphs)
+    return v
 
-    L = list(csv.DictReader(open(os.path.join(data, "lasserre.csv"))))
-    v["lasserregraphs"] = len(L)
-    v["lasserrerhooneexact"] = sum(exact(r, "k1") for r in L)
-    [w] = [r for r in csv.DictReader(open(os.path.join(data, "lasserre20.csv"))) if not exact(r, "k1") and not exact(r, "las2")]
-    v["weaklasserre"], v["weakrhoone"], v["weakhalfsqrtg"] = float(w["las2"]), float(w["k1"]), half(w)
 
-    m3 = [r for r in csv.DictReader(open(os.path.join(data, "polya_levels.csv"))) if r["graph"] == "matching-3"]
-    top = max(m3, key=lambda r: int(r["r"]))
-    v["polyalevel"], v["polyaratio"] = int(top["r"]), float(top["zeta"]) / half(top)
+def lasserre_values(data):
+    graphs = read_csv(data / File.LASSERRE_COMPARISON)
+    v = {"lasserregraphs": len(graphs), "lasserrerhooneexact": sum(is_exact(row, Column.RHO1) for row in graphs)}
+    # the one 20+20 graph on which neither rho^(1) nor the Lasserre bound is exact
+    [weak] = [
+        row
+        for row in read_csv(data / File.lasserre_size(20))
+        if not is_exact(row, Column.RHO1) and not is_exact(row, Column.LASSERRE)
+    ]
+    v["weaklasserre"] = float(weak[Column.LASSERRE])
+    v["weakrhoone"] = float(weak[Column.RHO1])
+    v["weakhalfsqrtg"] = half_sqrt_g(weak)
+    return v
 
-    S = [r for r in csv.DictReader(open(os.path.join(data, "smallest_penalty.csv"))) if r["family"] == "random"]
-    v["penaltygraphs"] = len(S)
-    v["penaltyratio"] = max(float(r["d_star"]) / float(r["bound_sqrt_g"]) for r in S)
 
-    A = list(csv.DictReader(open(os.path.join(data, "local_ascent.csv"))))
+def polya_values(data):
+    levels = [row for row in read_csv(data / File.POLYA_BOUNDS) if row[Column.GRAPH] == Graph.MATCHING_3]
+    top = max(levels, key=lambda row: int(row[Column.LEVEL]))
+    return {"polyalevel": int(top[Column.LEVEL]), "polyaratio": float(top[Column.ZETA]) / half_sqrt_g(top)}
+
+
+def penalty_values(data):
+    graphs = [row for row in read_csv(data / File.SMALLEST_PENALTY) if row[Column.FAMILY] == Family.RANDOM]
+    return {
+        "penaltygraphs": len(graphs),
+        "penaltyratio": max(float(row[Column.GAMMA_STAR]) / float(row[Column.GAMMA1]) for row in graphs),
+    }
+
+
+def ascent_values(data):
+    runs = read_csv(data / File.LOCAL_ASCENT)
     groups = defaultdict(list)
-    for r in A:
-        groups[(r["starts"], int(r["m"]), float(r["p"]), r["threshold"])].append(r)
-    pct = lambda rows, col: 100 * float(mean([r[col] for r in rows]))
-    large = ("gamma1", "gamma2", "gamma3", "gamma4")
-    classes = lambda starts, keep: [G for (s, m, p, t), G in groups.items() if s == starts and keep(p, t)]
-    v["ascentgraphs"] = sum(float(r["success"]) > 0 for r in groups[("random", 15, 0.3, "gamma1")])
-    v["densefallback"] = min(pct(G, "fallback") for G in classes("random", lambda p, t: p == 0.7 and t in large))
-    v["vertexfallback"] = max(pct(G, "fallback") for G in classes("vertex", lambda p, t: t in large))
-    v["edgeend"] = max(pct(G, "edge") for s in ("random", "vertex") for G in classes(s, lambda p, t: t in large))
-    starts = lambda r: 100 if r["starts"] == "random" else 2 * int(r["m"])
-    v["edgeruns"] = sum(round(float(r["edge"]) * starts(r)) for r in A if r["threshold"] in large)
-    v["edgerunspositive"] = sum(round(float(r["edge_positive"]) * starts(r)) for r in A if r["threshold"] in large)
-    for t, name in (("gamma1", "one"), ("gamma2", "two")):
-        v["support" + name] = pct(groups[("random", 10, 0.3, t)], "support")
-        v["fallback" + name] = pct(groups[("random", 10, 0.3, t)], "fallback")
-    half_edge = [pct(G, "edge") for G in classes("random", lambda p, t: p <= 0.5 and t == "gamma_c50")]
+    for row in runs:
+        groups[(row[Column.STARTS], int(row[Column.M1]), float(row[Column.P]), row[Column.PENALTY])].append(row)
+    percent = lambda group, column: 100 * float(exact_mean([row[column] for row in group]))
+    select = lambda kind, keep: [group for (starts, m, p, t), group in groups.items() if starts == kind and keep(p, t)]
+    starts_per_graph = lambda row: 100 if row[Column.STARTS] == Starts.RANDOM else 2 * int(row[Column.M1])
+    valid = lambda p, t: t in Penalty.VALID
+    v = {
+        "ascentgraphs": sum(float(row[Column.SUCCESS]) > 0 for row in groups[(Starts.RANDOM, 15, 0.3, Penalty.GAMMA1)])
+    }
+    v["densefallback"] = min(
+        percent(group, Column.FALLBACK) for group in select(Starts.RANDOM, lambda p, t: p == 0.7 and t in Penalty.VALID)
+    )
+    v["vertexfallback"] = max(percent(group, Column.FALLBACK) for group in select(Starts.VERTEX, valid))
+    v["edgeend"] = max(
+        percent(group, Column.EDGE_END) for kind in (Starts.RANDOM, Starts.VERTEX) for group in select(kind, valid)
+    )
+    v["edgeruns"] = sum(
+        round(float(row[Column.EDGE_END]) * starts_per_graph(row))
+        for row in runs
+        if row[Column.PENALTY] in Penalty.VALID
+    )
+    v["edgerunspositive"] = sum(
+        round(float(row[Column.EDGE_POSITIVE]) * starts_per_graph(row))
+        for row in runs
+        if row[Column.PENALTY] in Penalty.VALID
+    )
+    for penalty, name in ((Penalty.GAMMA1, "one"), (Penalty.GAMMA2, "two")):
+        v["support" + name] = percent(groups[(Starts.RANDOM, 10, 0.3, penalty)], Column.SUPPORT)
+        v["fallback" + name] = percent(groups[(Starts.RANDOM, 10, 0.3, penalty)], Column.FALLBACK)
+    half_edge = [
+        percent(group, Column.EDGE_END)
+        for group in select(Starts.RANDOM, lambda p, t: p <= 0.5 and t == Penalty.below(0.5))
+    ]
     v["halfedgemin"], v["halfedgemax"] = min(half_edge), max(half_edge)
-    v["quarteredgemin"] = min(pct(G, "edge") for G in classes("random", lambda p, t: t == "gamma_c25"))
+    v["quarteredgemin"] = min(
+        percent(group, Column.EDGE_END) for group in select(Starts.RANDOM, lambda p, t: t == Penalty.below(0.25))
+    )
+    return v
 
-    K = list(csv.DictReader(open(os.path.join(data, "k1_check.csv"))))
-    v["dualgap"] = max(abs(float(r["primal"]) - float(r["dual"])) for r in K)
-    write(tables, "values.csv", [{"name": k, "value": x} for k, x in v.items()])
+
+def rho_gap_values(data):
+    return {
+        "dualgap": max(
+            abs(float(row[Column.PRIMAL]) - float(row[Column.DUAL])) for row in read_csv(data / File.RHO_GAPS)
+        )
+    }
+
+
+def values_table(data, tables):
+    """The numbers quoted in the text, one per row: the tolerances of the code, then counts and extremes."""
+    v = {"exacttol": TOL, "roundoffset": ROUND, "solvertol": MOSEK_TOL, "bisectiontol": BISECTION_TOL}
+    for section in (random_graph_values, lasserre_values, polya_values, penalty_values, ascent_values, rho_gap_values):
+        v.update(section(data))
+    write(tables / "values.csv", [{"name": name, "value": x} for name, x in v.items()])
 
 
 def build(data, tables):
-    os.makedirs(tables, exist_ok=True)
-    bounds(data, tables)
-    matchings(data, tables)
-    thresholds(data, tables)
-    local_ascent(data, tables)
-    dsos_levels(data, tables)
-    values(data, tables)
+    tables.mkdir(parents=True, exist_ok=True)
+    bounds_table(data, tables)
+    matchings_table(data, tables)
+    thresholds_table(data, tables)
+    ascent_table(data, tables)
+    dsos_table(data, tables)
+    values_table(data, tables)
