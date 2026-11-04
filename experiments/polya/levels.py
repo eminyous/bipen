@@ -4,8 +4,6 @@ Levels 0 <= r <= 7, on the graph of LPV, Example 1, on 3K_2 and 4K_2, and on the
 Run with: bipen run polya/levels
 """
 
-import warnings
-
 import numpy as np
 
 from bipen.data import Column, File, Graph, write_csv
@@ -13,7 +11,6 @@ from bipen.exact import alpha_star, biclique_number
 from bipen.graphs import crown, matching
 from bipen.polya import zeta
 
-warnings.filterwarnings("ignore")
 MAX_LEVEL = 7
 
 

@@ -7,14 +7,12 @@ graphs need about 10 minutes and 5 GB each, and the whole run about 60 CPU hours
 Run with: bipen run bounds/sampled --workers N
 """
 
-import warnings
 from multiprocessing import Pool
 
 from bipen.data import Column, Family, File, graph_key, read_csv, write_csv
 from bipen.graphs import bounds_graph
 from experiments.bounds import structured
 
-warnings.filterwarnings("ignore")
 structured.RHO_MAX_N = 40
 SIZES = [(6, 6), (8, 8), (10, 10), (12, 12), (15, 15), (20, 20), (5, 10), (8, 16), (10, 20), (6, 24)]
 PS = [0.3, 0.5, 0.7]

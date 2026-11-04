@@ -6,7 +6,6 @@ Run with: bipen run bounds/lasserre --workers N [--size 20 --seeds 3]
 """
 
 import time
-import warnings
 from multiprocessing import Pool
 
 import numpy as np
@@ -16,7 +15,6 @@ from bipen.exact import biclique_number
 from bipen.graphs import bounds_graph
 from bipen.sdp import lasserre_g, rho1
 
-warnings.filterwarnings("ignore")
 SIZES = [6, 8, 10, 12, 15]
 PS = [0.3, 0.5, 0.7]
 

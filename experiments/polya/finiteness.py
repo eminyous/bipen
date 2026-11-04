@@ -5,15 +5,11 @@ the complete ones.
 Run with: bipen run polya/finiteness
 """
 
-import warnings
-
 import numpy as np
 
 from bipen.data import Column, File, write_csv
 from bipen.exact import alpha_star
 from bipen.polya import zeta
-
-warnings.filterwarnings("ignore")
 
 
 def first_finite_level(U, max_level):

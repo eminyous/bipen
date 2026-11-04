@@ -8,7 +8,6 @@ Run with: bipen run bounds/solvers --workers N
 
 import resource
 import time
-import warnings
 from multiprocessing import Pool
 
 import cvxpy as cp
@@ -19,7 +18,6 @@ from bipen.data import Column, File, graph_key, read_csv, write_csv
 from bipen.exact import biclique_number
 from bipen.graphs import bounds_graph
 
-warnings.filterwarnings("ignore")
 SETTINGS = [(cp.MOSEK, 1e-10), (cp.CLARABEL, None), (cp.CLARABEL, 1e-10)]
 BOUNDS = {
     Column.H1: lambda U: sdp.h1(U),

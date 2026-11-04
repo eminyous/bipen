@@ -4,8 +4,6 @@ Levels 0 <= r <= 2, on the graphs of polya/levels and on N_2.
 Run with: bipen run polya/dsos
 """
 
-import warnings
-
 import numpy as np
 
 from bipen.data import Column, File, Graph, write_csv
@@ -14,7 +12,6 @@ from bipen.exact import biclique_number
 from bipen.graphs import near_biclique
 from experiments.polya.levels import figure_graphs
 
-warnings.filterwarnings("ignore")
 MAX_LEVEL = 2
 
 

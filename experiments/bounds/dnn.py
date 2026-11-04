@@ -6,7 +6,6 @@ Run with: bipen run bounds/dnn
 """
 
 import itertools
-import warnings
 
 import numpy as np
 
@@ -14,7 +13,6 @@ from bipen.data import File
 from bipen.exact import biclique_number
 from bipen.sdp import h1
 
-warnings.filterwarnings("ignore")
 TOL = 1e-5
 
 

@@ -7,7 +7,6 @@ Run with: bipen run bounds/structured
 """
 
 import time
-import warnings
 
 import numpy as np
 
@@ -16,7 +15,6 @@ from bipen.exact import biclique_number, biclique_ratio
 from bipen.graphs import bounds_graph, crown, matching
 from bipen.sdp import h1, rho1
 
-warnings.filterwarnings("ignore")
 RHO_MAX_N = 30
 
 

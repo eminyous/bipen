@@ -7,7 +7,6 @@ Run with: bipen run bounds/inexact --workers N
 """
 
 import time
-import warnings
 from multiprocessing import Pool
 
 import cvxpy as cp
@@ -20,7 +19,6 @@ from bipen.exact import biclique_number
 from bipen.graphs import bounds_graph
 from bipen.sdp import dual_matrix, parrilo_cone
 
-warnings.filterwarnings("ignore")
 EXACT = 1e-5
 TOL = 1e-10
 
