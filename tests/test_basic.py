@@ -1,116 +1,103 @@
+import itertools
+
+import cvxpy as cp
 import numpy as np
 
-from bipen.brute import parameters
-from bipen.graphs import cost_matrix, full_adjacency, knn_minus_matching, random_bipartite
-from bipen.penalty import max_on_nonneg_sphere
+from bipen.dsos import rho_tilde, zeta_tilde
+from bipen.exact import biclique_number, biclique_ratio
+from bipen.graphs import adjacency, cost_matrix, crown, matching, penalty_matrix, random_bipartite
+from bipen.penalty import EDGE, NONMAXIMAL, OPTIMAL, ascent, end_state, max_on_nonnegative_sphere, repair
+from bipen.polya import zeta
+from bipen.sdp import h1, lasserre_g, parrilo_cone, rho1, solve
 
 
-def brute_g(B):
-    m, k = B.shape
+def naive_biclique_number(U):
+    m1, m2 = U.shape
     best = 0
-    for a in range(1 << m):
-        A = [i for i in range(m) if a >> i & 1]
-        free = [j for j in range(k) if not any(B[i, j] for i in A)]
-        best = max(best, len(A) * len(free))
+    for mask in range(1 << m1):
+        A = [i for i in range(m1) if mask >> i & 1]
+        B = [j for j in range(m2) if not any(U[i, j] for i in A)]
+        best = max(best, len(A) * len(B))
     return best
 
 
-def test_g_matches_naive():
+def test_biclique_number_matches_naive_enumeration():
     rng = np.random.default_rng(0)
     for _ in range(30):
-        B = random_bipartite(5, 6, 0.5, rng)
-        assert parameters(B)["g"] == brute_g(B)
+        U = random_bipartite(5, 6, 0.5, rng)
+        assert biclique_number(U) == naive_biclique_number(U)
 
 
-def test_knn_minus_matching():
-    p = parameters(knn_minus_matching(6))
-    assert p["g"] == 1 and p["h"] == 0.5
+def test_crown():
+    U = crown(6)
+    assert biclique_number(U) == 1 and biclique_ratio(U) == 0.5
 
 
-def test_penalty_large_d_gives_half_sqrt_g():
+def test_large_penalty_gives_half_sqrt_g():
     rng = np.random.default_rng(1)
     for _ in range(10):
-        B = random_bipartite(4, 4, 0.5, rng)
-        Q = cost_matrix(4, 4) - 10 * full_adjacency(B)
-        assert abs(max_on_nonneg_sphere(Q) - 0.5 * np.sqrt(parameters(B)["g"])) < 1e-8
+        U = random_bipartite(4, 4, 0.5, rng)
+        Q = cost_matrix(4, 4) - 10 * adjacency(U)
+        assert abs(max_on_nonnegative_sphere(Q) - 0.5 * np.sqrt(biclique_number(U))) < 1e-8
 
 
-def test_k1_matches_de_klerk_pasechnik_c5():
-    # theta^(1)(C5) = 2 (de Klerk-Pasechnik 2002, Example 4.1)
-    import cvxpy as cp
-
-    from bipen.sdp import _solve, k1_constraints
-
+def test_parrilo_cone_on_the_five_cycle():
+    # theta^(1)(C_5) = 2 (de Klerk and Pasechnik 2002, Example 4.1)
     n = 5
-    A = np.zeros((n, n))
+    W = np.zeros((n, n))
     for i in range(n):
-        A[i, (i + 1) % n] = A[(i + 1) % n, i] = 1
+        W[i, (i + 1) % n] = W[(i + 1) % n, i] = 1
     t = cp.Variable()
-    M = t * (np.eye(n) + A) - np.ones((n, n))
-    assert abs(_solve(cp.Problem(cp.Minimize(t), k1_constraints(M, n))) - 2) < 1e-5
+    M = t * (np.eye(n) + W) - np.ones((n, n))
+    assert abs(solve(cp.Problem(cp.Minimize(t), parrilo_cone(M, n))) - 2) < 1e-5
 
 
-def test_dnn_and_k1_are_upper_bounds():
-    from bipen.sdp import cop_k1, h1
-
+def test_h1_dnn_and_rho1_are_decreasing_upper_bounds():
     rng = np.random.default_rng(3)
     for _ in range(5):
-        B = random_bipartite(4, 5, 0.5, rng)
-        t = 0.5 * np.sqrt(parameters(B)["g"])
-        assert h1(B) >= h1(B, dnn=True) - 1e-6 >= cop_k1(B) - 2e-6 >= t - 3e-6
+        U = random_bipartite(4, 5, 0.5, rng)
+        half_sqrt_g = 0.5 * np.sqrt(biclique_number(U))
+        assert h1(U) >= h1(U, dnn=True) - 1e-6 >= rho1(U) - 2e-6 >= half_sqrt_g - 3e-6
 
 
 def test_lasserre_bound_is_exact_at_order_alpha():
-    from bipen.sdp import g_las
-
-    B = np.eye(3)  # M_3: g = 2, alpha = 3
-    assert g_las(B, 2) >= 2 - 1e-6
-    assert abs(g_las(B, 3) - 2) < 1e-6
+    U = matching(3)  # g = 2, alpha = 3
+    assert lasserre_g(U, 2) >= 2 - 1e-6
+    assert abs(lasserre_g(U, 3) - 2) < 1e-6
 
 
 def test_ascent_stays_at_an_optimal_pair():
-    from bipen.penalty import ascent
-
-    B = np.eye(3)  # optimal pair ({1}, {2, 3})
-    x, y = np.array([1.0, 0, 0]), np.array([0, 1.0, 1.0]) / np.sqrt(2)
-    *_, val, _ = ascent(1 - 2 * (1 + np.sqrt(2)) / 2 * B, x, y)
-    assert abs(val - np.sqrt(2)) < 1e-9
+    U = matching(3)  # an optimal pair: ({v11}, {v22, v23})
+    y, z = np.array([1.0, 0, 0]), np.array([0, 1.0, 1.0]) / np.sqrt(2)
+    *_, value, _ = ascent(penalty_matrix(U, (1 + np.sqrt(2)) / 2), y, z)
+    assert abs(value - np.sqrt(2)) < 1e-9
 
 
 def test_end_state_and_repair():
-    from bipen.penalty import end_state, repair
-
-    B = np.array([[1, 0], [0, 0]], dtype=bool)  # one edge on 2+2 vertices, g = 2
-    x, y = np.array([1.0, 0]), np.array([1.0, 1.0]) / np.sqrt(2)
-    assert end_state(B, 2, x, y) == "edge"
-    assert repair(B, x, y) == 2
-    assert end_state(B, 2, np.array([0, 1.0]), y) == "optimal"
-    assert end_state(B, 2, np.array([0, 1.0]), np.array([1.0, 0])) == "nonmaximal"
+    U = np.array([[1, 0], [0, 0]], dtype=bool)  # one edge on 2 + 2 vertices, g = 2
+    y, z = np.array([1.0, 0]), np.array([1.0, 1.0]) / np.sqrt(2)
+    assert end_state(U, 2, y, z) == EDGE
+    assert repair(U, y, z) == 2
+    assert end_state(U, 2, np.array([0, 1.0]), z) == OPTIMAL
+    assert end_state(U, 2, np.array([0, 1.0]), np.array([1.0, 0])) == NONMAXIMAL
 
 
-def test_dsos_level_0():
-    # Propositions B.3 and B.4: zeta_L^(0) is half the maximum degree of the bipartite complement, and zeta_R^(0) lies
-    # between half the spectral norm of J - U and zeta_L^(0)
-    from bipen.dsos import zeta
-
+def test_dsos_and_sdsos_at_level_0():
+    # Propositions B.3 and B.4: zeta~^(0) is half the maximum degree of the bipartite complement, and rho~^(0) lies
+    # between half the spectral norm of J - U and zeta~^(0)
     rng = np.random.default_rng(4)
     for _ in range(5):
-        B = random_bipartite(3, 4, 0.5, rng)
-        d = max((1 - B).sum(0).max(), (1 - B).sum(1).max())
-        dsos, sdsos = zeta(B, 0), zeta(B, 0, scaled=True)
-        assert abs(dsos - d / 2) < 1e-6
-        assert 0.5 * np.linalg.norm(1 - B, 2) - 1e-6 <= sdsos <= dsos + 1e-6
+        U = random_bipartite(3, 4, 0.5, rng)
+        max_degree = max((1 - U).sum(0).max(), (1 - U).sum(1).max())
+        dsos, sdsos = zeta_tilde(U, 0), rho_tilde(U, 0)
+        assert abs(dsos - max_degree / 2) < 1e-6
+        assert 0.5 * np.linalg.norm(1 - U, 2) - 1e-6 <= sdsos <= dsos + 1e-6
 
 
-def test_dsos_between_polya_and_k1():
+def test_dsos_and_sdsos_between_polya_and_parrilo():
     # Proposition B.2 at level 1
-    from bipen.dsos import zeta as zeta_dsos
-    from bipen.polya import zeta as zeta_polya
-    from bipen.sdp import cop_k1
-
     rng = np.random.default_rng(5)
     for _ in range(3):
-        B = random_bipartite(2, 3, 0.5, rng)
-        chain = [zeta_polya(B, 1), zeta_dsos(B, 1), zeta_dsos(B, 1, scaled=True), cop_k1(B),
-                 0.5 * np.sqrt(parameters(B)["g"])]
-        assert all(a >= b - 1e-6 for a, b in zip(chain, chain[1:]))
+        U = random_bipartite(2, 3, 0.5, rng)
+        chain = [zeta(U, 1), zeta_tilde(U, 1), rho_tilde(U, 1), rho1(U), 0.5 * np.sqrt(biclique_number(U))]
+        assert all(a >= b - 1e-6 for a, b in itertools.pairwise(chain))
