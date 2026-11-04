@@ -1,6 +1,8 @@
 [project]
 name = "bipen"
 version = "0.1.0"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
     "numpy",
