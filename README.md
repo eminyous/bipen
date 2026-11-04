@@ -21,17 +21,16 @@ bipen tables
 bipen plots
 ```
 
-- `bipen list` names the experiments, in the order of the paper.
+- `bipen list` names the experiments.
 - `bipen run <experiment>` runs one and writes its results to `data/`.
-- `bipen tables` and `bipen plots` write the numbers of the tables and of the figure to `tables/` and `figures/`, where
-  the paper reads them.
+- `bipen tables` and `bipen plots` write the numbers of the paper's tables and figure to `tables/` and `figures/`.
 
-The folders are those of the paper folder that contains this code; `--data`, `--tables` and `--figures` choose others.
+`data/`, `tables/` and `figures/` are the folders next to `code/`; `--data`, `--tables` and `--figures` change them.
 `--quiet` hides the warnings of the solvers.
 
 ## Layout
 
-- `bipen/`: the bounds, the penalty formulation and the exact values, in the notation of the paper.
+- `bipen/`: the bounds, the penalty formulation and the exact values of g, h and α*.
 - `bipen/data.py`: the names of the data files and of their columns.
 - `experiments/bounds/`, `experiments/penalty/`, `experiments/polya/`: one module per experiment; `data/` has the same
   layout.
