@@ -16,7 +16,7 @@ For each graph, penalty and kind of start, the fraction of runs that
   a maximal pair that is not maximum (penalty.end_state); edge_positive: end with an edge and a positive value;
 - fallback: find (H z)_+ = 0 at the first step and move to a vertex;
 and the mean fraction of the side in the support after the first step (support) and the mean number of steps.
-Run with: bipen run local-ascent --workers N
+Run with: bipen run penalty/ascent --workers N
 """
 
 from multiprocessing import Pool

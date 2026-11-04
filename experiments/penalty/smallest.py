@@ -5,7 +5,7 @@ Glineur after the change of parameter 2 gamma - 1.
 
 Graphs: 100 random graphs for each size 2+3 to 5+5 and each p in {0.2, 0.4, 0.6, 0.8}, without the empty and the
 complete ones, and the graphs N_k, 2 <= k <= 5.
-Run with: bipen run smallest-penalty --workers N
+Run with: bipen run penalty/smallest --workers N
 """
 
 from multiprocessing import Pool

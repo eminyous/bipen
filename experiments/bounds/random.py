@@ -1,10 +1,10 @@
 """h_1, h_1^D and rho^(1) on the random graphs of Table 1.
 
 100 graphs for each size and each p in {0.3, 0.5, 0.7}, with rho^(1) also on 20+20.
-The 180 random graphs of structured_bounds are the first ten of each balanced size and p; they are copied from there
+The 180 random graphs of bounds/structured are the first ten of each balanced size and p; they are copied from there
 when it exists. The results are appended, largest graphs first, and a rerun skips the graphs already there. The 20+20
 graphs need about 10 minutes and 5 GB each, and the whole run about 60 CPU hours.
-Run with: bipen run random-bounds --workers N
+Run with: bipen run bounds/random --workers N
 """
 
 import warnings
@@ -12,10 +12,10 @@ from multiprocessing import Pool
 
 from bipen.data import Column, Family, File, graph_key, read_csv, write_csv
 from bipen.graphs import bounds_graph
-from experiments import structured_bounds
+from experiments.bounds import structured
 
 warnings.filterwarnings("ignore")
-structured_bounds.RHO_MAX_N = 40
+structured.RHO_MAX_N = 40
 SIZES = [(6, 6), (8, 8), (10, 10), (12, 12), (15, 15), (20, 20), (5, 10), (8, 16), (10, 20), (6, 24)]
 PS = [0.3, 0.5, 0.7]
 GRAPHS = 100
@@ -23,7 +23,7 @@ GRAPHS = 100
 
 def job(graph):
     m1, m2, p, s = graph
-    return structured_bounds.bounds_row(Family.RANDOM, bounds_graph(m1, m2, p, s), p, s)
+    return structured.bounds_row(Family.RANDOM, bounds_graph(m1, m2, p, s), p, s)
 
 
 def main(data, workers=2):

@@ -3,7 +3,7 @@
 On every random graph of Table 1 where rho^(1) is not exact, with the primal and dual objectives and residuals, to
 check that the gaps are not numerical artefacts. The dual objective is a lower bound on rho^(1) up to the dual
 residual.
-Run with: bipen run rho-gaps --workers N
+Run with: bipen run bounds/inexact --workers N
 """
 
 import time

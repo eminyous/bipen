@@ -13,12 +13,9 @@ from experiments import NAMES
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def command_name(module):
-    return module.replace("_", "-")
-
-
 def experiment(name):
-    return importlib.import_module("experiments." + name.replace("-", "_"))
+    """The module of an experiment, from its name family/name."""
+    return importlib.import_module("experiments." + name.replace("/", "."))
 
 
 def run(args):
@@ -37,10 +34,10 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("list", help="list the experiments, in the order of the paper")
     p = sub.add_parser("run", help="run one experiment")
-    p.add_argument("experiment", choices=[command_name(name) for name in NAMES])
+    p.add_argument("experiment", choices=NAMES)
     p.add_argument("--workers", type=int, help="number of parallel processes")
-    p.add_argument("--size", type=int, help="lasserre-comparison only: a single balanced size")
-    p.add_argument("--seeds", type=int, help="lasserre-comparison only: graphs per size and probability")
+    p.add_argument("--size", type=int, help="bounds/lasserre only: a single balanced size")
+    p.add_argument("--seeds", type=int, help="bounds/lasserre only: graphs per size and probability")
     p.add_argument("--data", type=Path, default=ROOT / "data", help="where the results are written and read")
     p = sub.add_parser("tables", help="write the numbers of the tables of the paper")
     p.add_argument("--data", type=Path, default=ROOT / "data", help="where the results are read")
@@ -52,7 +49,7 @@ def main():
 
     if args.command == "list":
         for name in NAMES:
-            print(f"{command_name(name):26} {experiment(name).__doc__.splitlines()[0]}")
+            print(f"{name:22} {experiment(name).__doc__.splitlines()[0]}")
     elif args.command == "run":
         run(args)
     elif args.command == "tables":

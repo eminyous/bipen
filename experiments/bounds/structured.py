@@ -3,7 +3,7 @@
 Also g, h and sqrt(g)/2. Graphs: the graph of LPV, Example 1; the matchings sK_2, 2 <= s <= 12; the crowns,
 5 <= s <= 12; and ten random graphs for each balanced size 6+6 to 20+20 and each p in {0.3, 0.5, 0.7}. rho^(1) is
 computed up to RHO_MAX_N vertices only, as its cost grows like n^3.
-Run with: bipen run structured-bounds
+Run with: bipen run bounds/structured
 """
 
 import time

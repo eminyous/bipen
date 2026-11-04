@@ -6,7 +6,7 @@ Enumerates the graphs with sides 1+4 and 2+3 up to isomorphism, deletes full ver
 then has at most four vertices, or has no edge, or is one of the graphs G_1, ..., G_4 of Table A.1. For those four,
 the certificate S = lambda I - C + Y - Z of the table is checked to be positive semidefinite in exact arithmetic.
 Prints only.
-Run with: bipen run five-vertex-certificates
+Run with: bipen run bounds/certificates
 """
 
 import itertools

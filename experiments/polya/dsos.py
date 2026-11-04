@@ -1,7 +1,7 @@
 """The DSOS bounds zeta~^(r) by level (Table B.1).
 
 Levels 0 <= r <= 2, on the graphs of Figure 1 and on N_2.
-Run with: bipen run dsos-bounds
+Run with: bipen run polya/dsos
 """
 
 import warnings
@@ -12,7 +12,7 @@ from bipen.data import Column, File, Graph, write_csv
 from bipen.dsos import zeta_tilde
 from bipen.exact import biclique_number
 from bipen.graphs import near_biclique
-from experiments.polya_bounds import figure_graphs
+from experiments.polya.levels import figure_graphs
 
 warnings.filterwarnings("ignore")
 MAX_LEVEL = 2

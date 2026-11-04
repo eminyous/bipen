@@ -2,7 +2,7 @@
 
 Graphs: 15 random graphs for each size 2+2, 2+3, 3+3 and 3+4, with an edge probability drawn in [0.2, 0.8], without
 the complete ones.
-Run with: bipen run polya-first-finite-level
+Run with: bipen run polya/finiteness
 """
 
 import warnings

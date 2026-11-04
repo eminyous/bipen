@@ -2,7 +2,7 @@
 
 Graphs: the first ten random graphs of Table 1 of each balanced size up to 15+15 and each p in {0.3, 0.5, 0.7}; with
 --size and --seeds, that many graphs of that size only, in a file of its own.
-Run with: bipen run lasserre-comparison --workers N [--size 20 --seeds 3]
+Run with: bipen run bounds/lasserre --workers N [--size 20 --seeds 3]
 """
 
 import time

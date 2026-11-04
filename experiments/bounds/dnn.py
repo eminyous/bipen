@@ -2,7 +2,7 @@
 
 Every graph of the sizes 2+3 to 2+5, then 400 random graphs for each size 4+4 to 6+6, with an edge probability drawn
 in [0.2, 0.8]. Writes one line per graph found.
-Run with: bipen run dnn-exactness
+Run with: bipen run bounds/dnn
 """
 
 import itertools
