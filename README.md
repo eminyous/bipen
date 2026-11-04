@@ -12,4 +12,4 @@ bipen tables
 bipen plots
 ```
 
-`bipen list` names the experiments in the order of the paper, and `bipen run <experiment>` runs one of them. Results go to `data/` of the paper folder (file and column names in `bipen/data.py`), and the numbers of the tables and of the figure go as CSV files to `tables/` and `figures/`, which the paper reads; `--data`, `--tables` and `--figures` choose other folders. MOSEK needs a license; `BIPEN_SOLVER=clarabel` uses Clarabel instead.
+`bipen list` names the experiments in the order of the paper, and `bipen run <experiment>` runs one of them. Results go to `data/` of the paper folder (file and column names in `bipen/data.py`), and the numbers of the tables and of the figure go as CSV files to `tables/` and `figures/`, which the paper reads; `--data`, `--tables` and `--figures` choose other folders. `--quiet` hides the warnings of the solvers. MOSEK needs a license; `BIPEN_SOLVER=clarabel` uses Clarabel instead.

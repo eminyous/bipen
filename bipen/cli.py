@@ -6,6 +6,8 @@ The folders default to data/, tables/ and figures/ of the paper folder that cont
 import argparse
 import importlib
 import inspect
+import os
+import warnings
 from pathlib import Path
 
 from experiments import NAMES
@@ -19,6 +21,10 @@ def experiment(name):
 
 
 def run(args):
+    if args.quiet:
+        # the workers of the experiments inherit the filter, or read the variable when they are spawned
+        os.environ["PYTHONWARNINGS"] = "ignore"
+        warnings.filterwarnings("ignore")
     module = experiment(args.experiment)
     given = {"data": args.data, "workers": args.workers, "size": args.size, "seeds": args.seeds}
     accepted = inspect.signature(module.main).parameters
@@ -36,6 +42,7 @@ def main():
     p = sub.add_parser("run", help="run one experiment")
     p.add_argument("experiment", choices=NAMES)
     p.add_argument("--workers", type=int, help="number of parallel processes")
+    p.add_argument("--quiet", action="store_true", help="hide the warnings of the solvers and of numpy")
     p.add_argument("--size", type=int, help="bounds/lasserre only: a single balanced size")
     p.add_argument("--seeds", type=int, help="bounds/lasserre only: graphs per size and probability")
     p.add_argument("--data", type=Path, default=ROOT / "data", help="where the results are written and read")
